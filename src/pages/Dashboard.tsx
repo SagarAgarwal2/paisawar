@@ -1,0 +1,434 @@
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
+import { Button } from '../components/ui/Button'
+import { Card } from '../components/ui/Card'
+import { RankBadge } from '../components/RankBadge'
+import { MOCK_STOCKS, DAILY_CONTRACTS, SEASONS } from '../data/mockData'
+import { formatWealth } from '../types/game'
+import { supabase } from '../lib/supabase'
+
+type Tab = 'home' | 'leaderboard' | 'market' | 'contracts' | 'profile'
+
+const MOCK_HOLDINGS: Record<string, number> = { MSIP: 5, GLDR: 2, SIPA: 8 }
+
+interface LeaderboardEntry {
+  id: string
+  user_id: string
+  username: string
+  wins: number
+  losses: number
+  total_games: number
+  highest_net_worth: number
+}
+
+export function Dashboard() {
+  const { profile, logout } = useAuth()
+  const navigate = useNavigate()
+  const [tab, setTab] = useState<Tab>('home')
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false)
+
+  const handleLogout = async () => {
+    await logout()
+    navigate('/')
+  }
+
+  useEffect(() => {
+    if (tab === 'leaderboard') fetchLeaderboard()
+  }, [tab])
+
+  const fetchLeaderboard = async () => {
+    setLeaderboardLoading(true)
+    const { data } = await supabase
+      .from('leaderboard')
+      .select('*')
+      .order('wins', { ascending: false })
+      .limit(50)
+    setLeaderboard(data ?? [])
+    setLeaderboardLoading(false)
+  }
+
+  const rp = profile?.rank_points ?? 0
+  const coins = profile?.daank_coins ?? 100
+  const currentSeason = SEASONS[0]
+
+  const portfolioValue = MOCK_STOCKS.reduce((sum, stock) => {
+    const shares = MOCK_HOLDINGS[stock.ticker] ?? 0
+    return sum + shares * stock.current_price
+  }, 0)
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#0a0e1a', display: 'flex', flexDirection: 'column' }}>
+      {/* Top Nav */}
+      <nav style={{
+        position: 'sticky', top: 0, zIndex: 40,
+        background: 'rgba(10,14,26,0.95)', backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        padding: '0 20px',
+        height: 60,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: 18, color: '#f59e0b' }}>PAISA WAR</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#1a2235', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '5px 12px' }}>
+            <span style={{ fontSize: 14 }}>🪙</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#f59e0b' }}>{coins.toLocaleString()} DC</span>
+          </div>
+          <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}>Sign Out</button>
+        </div>
+      </nav>
+
+      <div style={{ display: 'flex', flex: 1 }}>
+        {/* Sidebar */}
+        <aside style={{
+          width: 200, flexShrink: 0,
+          background: '#0f1524', borderRight: '1px solid rgba(255,255,255,0.06)',
+          padding: '20px 12px',
+          display: 'flex', flexDirection: 'column', gap: 4,
+          position: 'sticky', top: 60, height: 'calc(100vh - 60px)',
+          overflowY: 'auto',
+        }}>
+          {([
+            { id: 'home', label: 'Home', icon: '🏠' },
+            { id: 'leaderboard', label: 'Leaderboard', icon: '🏆' },
+            { id: 'market', label: 'DAANK Market', icon: '📈' },
+            { id: 'contracts', label: 'Contracts', icon: '📋' },
+            { id: 'profile', label: 'Profile', icon: '👤' },
+          ] as const).map(item => (
+            <button
+              key={item.id}
+              onClick={() => setTab(item.id)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '10px 12px', borderRadius: 8, border: 'none',
+                background: tab === item.id ? 'rgba(37,99,235,0.15)' : 'transparent',
+                color: tab === item.id ? '#60a5fa' : '#64748b',
+                cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
+                textAlign: 'left', width: '100%',
+                transition: 'all 0.15s',
+              }}
+            >
+              <span style={{ fontSize: 16 }}>{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
+
+          <div style={{ marginTop: 'auto', padding: '12px 0', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            {profile && <RankBadge rp={rp} showProgress size="sm" />}
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main style={{ flex: 1, padding: '24px', overflowY: 'auto', animation: 'fadeIn 0.3s ease' }}>
+          {tab === 'home' && <HomeTab navigate={navigate} profile={profile} currentSeason={currentSeason} />}
+          {tab === 'leaderboard' && <LeaderboardTab leaderboard={leaderboard} loading={leaderboardLoading} profile={profile} onRefresh={fetchLeaderboard} />}
+          {tab === 'market' && <MarketTab stocks={MOCK_STOCKS} holdings={MOCK_HOLDINGS} portfolioValue={portfolioValue} coins={coins} />}
+          {tab === 'contracts' && <ContractsTab />}
+          {tab === 'profile' && <ProfileTab profile={profile} />}
+        </main>
+      </div>
+    </div>
+  )
+}
+
+function HomeTab({ navigate, profile, currentSeason }: { navigate: (path: string) => void; profile: ReturnType<typeof useAuth>['profile']; currentSeason: typeof SEASONS[0] }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 900 }}>
+      {/* Welcome */}
+      <div style={{ background: 'linear-gradient(135deg, rgba(37,99,235,0.15), rgba(245,158,11,0.1))', border: '1px solid rgba(37,99,235,0.2)', borderRadius: 16, padding: '24px 28px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif', marginBottom: 4 }}>
+              Welcome, {profile?.username ?? 'Mogul'} 👋
+            </h1>
+            <p style={{ color: '#64748b', fontSize: 14 }}>Ready to build your empire?</p>
+          </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <Button variant="gold" size="lg" onClick={() => navigate('/multiplayer')}>Play Online</Button>
+            <Button variant="primary" onClick={() => navigate('/game')}>vs AI</Button>
+            <Button variant="secondary" onClick={() => navigate('/game?mode=casual')}>Casual</Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
+        {[
+          { label: 'Games Played', value: (profile?.games_played ?? 0).toString(), icon: '🎮', color: '#3b82f6' },
+          { label: 'Games Won', value: (profile?.games_won ?? 0).toString(), icon: '🏆', color: '#10b981' },
+          { label: 'Win Streak', value: `${profile?.win_streak ?? 0}🔥`, icon: '🔥', color: '#f59e0b' },
+          { label: 'Total XP', value: (profile?.total_xp ?? 0).toLocaleString(), icon: '⭐', color: '#f59e0b' },
+        ].map(stat => (
+          <Card key={stat.label} style={{ padding: '16px 20px' }}>
+            <div style={{ fontSize: 24, marginBottom: 6 }}>{stat.icon}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: stat.color, fontFamily: 'Space Grotesk, sans-serif' }}>{stat.value}</div>
+            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{stat.label}</div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Season Banner */}
+      <Card glow="gold" style={{ padding: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <div style={{ fontSize: 12, color: '#f59e0b', fontWeight: 700, letterSpacing: '0.05em', marginBottom: 6 }}>ACTIVE SEASON</div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif', marginBottom: 4 }}>
+              Season {currentSeason.number}: {currentSeason.name}
+            </h2>
+            <p style={{ color: '#94a3b8', fontSize: 13 }}>{currentSeason.theme}</p>
+            <div style={{ marginTop: 8, padding: '4px 10px', borderRadius: 6, background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', display: 'inline-block', fontSize: 12, color: '#f59e0b', fontWeight: 600 }}>
+              ⚡ {currentSeason.special_rule}
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 13, color: '#64748b', marginBottom: 4 }}>Season ends in</div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif' }}>12d 4h</div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Quick Play Options */}
+      <div>
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#f1f5f9', marginBottom: 16, fontFamily: 'Space Grotesk, sans-serif' }}>Game Modes</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+          {[
+            { title: 'Play Online', desc: 'Create or join a room. Play against real players worldwide.', icon: '🌐', action: () => navigate('/multiplayer'), color: '#f59e0b' },
+            { title: 'vs AI', desc: 'Practice against adaptive AI opponents.', icon: '🤖', action: () => navigate('/game?mode=ai'), color: '#059669' },
+            { title: 'Ranked Match', desc: 'Earn/lose RP. Climb the Mogul ladder.', icon: '🏆', action: () => navigate('/game?mode=ranked'), color: '#2563eb' },
+          ].map(m => (
+            <Card key={m.title} hoverable onClick={m.action} style={{ padding: 20, cursor: 'pointer' }}>
+              <div style={{ fontSize: 28, marginBottom: 12 }}>{m.icon}</div>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', marginBottom: 6, fontFamily: 'Space Grotesk, sans-serif' }}>{m.title}</h3>
+              <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5, marginBottom: 12 }}>{m.desc}</p>
+              <div style={{ display: 'inline-block', padding: '4px 12px', borderRadius: 6, background: `${m.color}22`, color: m.color, fontSize: 12, fontWeight: 700 }}>
+                Play Now
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function LeaderboardTab({ leaderboard, loading, profile, onRefresh }: { leaderboard: LeaderboardEntry[]; loading: boolean; profile: ReturnType<typeof useAuth>['profile']; onRefresh: () => void }) {
+  return (
+    <div style={{ maxWidth: 700 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>Leaderboard</h2>
+        <button onClick={onRefresh} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '6px 14px', color: '#94a3b8', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}>
+          Refresh
+        </button>
+      </div>
+      <Card>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+            <div style={{ width: 28, height: 28, border: '2px solid rgba(255,255,255,0.1)', borderTopColor: '#f59e0b', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+            Loading leaderboard...
+          </div>
+        ) : leaderboard.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>🏆</div>
+            No entries yet. Be the first to play!
+          </div>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                {['Rank', 'Player', 'Wins', 'Games', 'Win %', 'Best Wealth'].map(h => (
+                  <th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontSize: 12, color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {leaderboard.map((player, i) => {
+                const isMe = player.username === profile?.username
+                const winRate = player.total_games > 0 ? Math.round((player.wins / player.total_games) * 100) : 0
+                return (
+                  <tr key={player.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: isMe ? 'rgba(37,99,235,0.08)' : 'transparent' }}>
+                    <td style={{ padding: '12px', fontSize: 14, fontWeight: 700, color: i < 3 ? (['#f59e0b', '#94a3b8', '#d97706'][i] ?? '#64748b') : '#64748b' }}>
+                      {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
+                    </td>
+                    <td style={{ padding: '12px', fontSize: 14, color: '#f1f5f9', fontWeight: isMe ? 700 : 400 }}>
+                      {player.username} {isMe && <span style={{ fontSize: 11, color: '#60a5fa', marginLeft: 6 }}>(you)</span>}
+                    </td>
+                    <td style={{ padding: '12px', fontSize: 14, fontWeight: 700, color: '#10b981' }}>{player.wins}</td>
+                    <td style={{ padding: '12px', fontSize: 13, color: '#94a3b8' }}>{player.total_games}</td>
+                    <td style={{ padding: '12px', fontSize: 13, color: winRate > 60 ? '#10b981' : '#94a3b8' }}>{winRate}%</td>
+                    <td style={{ padding: '12px', fontSize: 13, color: '#f59e0b', fontWeight: 600 }}>{formatWealth(player.highest_net_worth)}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        )}
+      </Card>
+    </div>
+  )
+}
+
+function MarketTab({ stocks, holdings, portfolioValue, coins }: { stocks: typeof MOCK_STOCKS; holdings: Record<string, number>; portfolioValue: number; coins: number }) {
+  return (
+    <div style={{ maxWidth: 900 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>DAANK Stock Market</h2>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ background: '#1a2235', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '8px 16px', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: '#64748b' }}>PORTFOLIO</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#10b981', fontFamily: 'Space Grotesk, sans-serif' }}>{formatWealth(portfolioValue)}</div>
+          </div>
+          <div style={{ background: '#1a2235', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '8px 16px', textAlign: 'center' }}>
+            <div style={{ fontSize: 11, color: '#64748b' }}>COINS</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif' }}>🪙 {coins}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+        {stocks.map(stock => {
+          const ownedShares = holdings[stock.ticker] ?? 0
+          const isUp = stock.trend === 'up'
+          const isDown = stock.trend === 'down'
+
+          return (
+            <Card key={stock.ticker} style={{ padding: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: '#94a3b8', letterSpacing: '0.05em', marginBottom: 2 }}>{stock.ticker}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>{stock.name}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>
+                    ₹{stock.current_price.toLocaleString()}
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: isUp ? '#10b981' : isDown ? '#ef4444' : '#94a3b8' }}>
+                    {isUp ? '↑' : isDown ? '↓' : '→'} {Math.abs(stock.price_change_pct).toFixed(1)}%
+                  </div>
+                </div>
+              </div>
+
+              <p style={{ fontSize: 12, color: '#64748b', marginBottom: 12, lineHeight: 1.4 }}>{stock.description}</p>
+
+              {ownedShares > 0 && (
+                <div style={{ padding: '6px 10px', borderRadius: 6, background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', marginBottom: 12, fontSize: 12, color: '#34d399' }}>
+                  You own {ownedShares} shares — {formatWealth(ownedShares * stock.current_price)}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button style={{ flex: 1, padding: '7px', borderRadius: 7, background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', color: '#34d399', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  Buy
+                </button>
+                <button style={{ flex: 1, padding: '7px', borderRadius: 7, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171', fontSize: 13, fontWeight: 700, cursor: ownedShares > 0 ? 'pointer' : 'not-allowed', opacity: ownedShares > 0 ? 1 : 0.4, fontFamily: 'inherit' }}>
+                  Sell
+                </button>
+              </div>
+            </Card>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function ContractsTab() {
+  const contracts = DAILY_CONTRACTS
+  const mockProgress: Record<string, number> = { '1': 1, '2': 3 }
+
+  const difficultyColors = { easy: '#10b981', medium: '#f59e0b', hard: '#ef4444' }
+
+  return (
+    <div style={{ maxWidth: 700 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>Daily Contracts</h2>
+        <div style={{ fontSize: 13, color: '#64748b' }}>Resets in <span style={{ color: '#f59e0b', fontWeight: 700 }}>11h 42m</span></div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {contracts.map(contract => {
+          const progress = mockProgress[contract.id] ?? 0
+          const completed = progress >= contract.requirement_value
+          const pct = Math.min(100, (progress / contract.requirement_value) * 100)
+          const color = difficultyColors[contract.difficulty]
+
+          return (
+            <Card key={contract.id} style={{ padding: 20, borderColor: completed ? 'rgba(16,185,129,0.3)' : contract.is_weekly ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.08)', background: completed ? 'rgba(16,185,129,0.05)' : contract.is_weekly ? 'rgba(245,158,11,0.04)' : '#1a2235' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: `${color}22`, color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {contract.difficulty}
+                    </span>
+                    {contract.is_weekly && <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: 'rgba(245,158,11,0.2)', color: '#f59e0b' }}>WEEKLY</span>}
+                    {completed && <span style={{ fontSize: 11, fontWeight: 700, color: '#10b981' }}>✓ COMPLETE</span>}
+                  </div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', marginBottom: 4, fontFamily: 'Space Grotesk, sans-serif' }}>{contract.title}</div>
+                  <div style={{ fontSize: 13, color: '#64748b', marginBottom: 10 }}>{contract.description}</div>
+
+                  <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, background: completed ? '#10b981' : color, borderRadius: 2, transition: 'width 0.5s ease' }} />
+                  </div>
+                  <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>{progress}/{contract.requirement_value}</div>
+                </div>
+
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif' }}>🪙 {contract.reward_dc}</div>
+                  {contract.reward_card_tier && (
+                    <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>+ 1 {contract.reward_card_tier} card</div>
+                  )}
+                </div>
+              </div>
+            </Card>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function ProfileTab({ profile }: { profile: ReturnType<typeof useAuth>['profile'] }) {
+  const rp = profile?.rank_points ?? 0
+  const winRate = profile && profile.games_played > 0 ? Math.round((profile.games_won / profile.games_played) * 100) : 0
+
+  return (
+    <div style={{ maxWidth: 600 }}>
+      <Card style={{ padding: 28, marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: 20, alignItems: 'center', marginBottom: 24 }}>
+          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #1d4ed8, #0d9488)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 700, color: '#fff', fontFamily: 'Space Grotesk, sans-serif' }}>
+            {(profile?.username?.[0] ?? '?').toUpperCase()}
+          </div>
+          <div>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif', marginBottom: 4 }}>
+              {profile?.username ?? 'Unknown Player'}
+            </h2>
+            <RankBadge rp={rp} showProgress />
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          {[
+            { label: 'Games Played', value: (profile?.games_played ?? 0).toString() },
+            { label: 'Games Won', value: (profile?.games_won ?? 0).toString() },
+            { label: 'Win Rate', value: `${winRate}%` },
+            { label: 'Best Streak', value: `${profile?.max_win_streak ?? 0}🔥` },
+            { label: 'Total XP', value: (profile?.total_xp ?? 0).toLocaleString() },
+            { label: 'DAANK Coins', value: `🪙 ${(profile?.daank_coins ?? 0).toLocaleString()}` },
+          ].map(stat => (
+            <div key={stat.label} style={{ padding: '14px 16px', background: '#0f1524', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>{stat.label}</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>{stat.value}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card style={{ padding: 20 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', marginBottom: 16, fontFamily: 'Space Grotesk, sans-serif' }}>Rank History</h3>
+        <div style={{ fontSize: 14, color: '#64748b', textAlign: 'center', padding: '20px 0' }}>
+          Play more ranked games to see your rank progression here.
+        </div>
+      </Card>
+    </div>
+  )
+}
