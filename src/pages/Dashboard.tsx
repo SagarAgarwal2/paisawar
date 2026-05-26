@@ -7,8 +7,9 @@ import { RankBadge } from '../components/RankBadge'
 import { DAILY_CONTRACTS, SEASONS } from '../data/mockData'
 import { formatWealth } from '../types/game'
 import { supabase } from '../lib/supabase'
+import { TutorialModal } from '../components/TutorialModal'
 
-type Tab = 'home' | 'leaderboard' | 'market' | 'contracts' | 'profile'
+type Tab = 'home' | 'leaderboard' | 'contracts' | 'profile'
 
 
 interface LeaderboardEntry {
@@ -27,7 +28,13 @@ export function Dashboard() {
   const [tab, setTab] = useState<Tab>('home')
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [leaderboardLoading, setLeaderboardLoading] = useState(false)
+  const [showTutorial, setShowTutorial] = useState(false)
 
+  useEffect(() => {
+    if (!localStorage.getItem('hasSeenTutorial')) {
+      setShowTutorial(true)
+    }
+  }, [])
 
   const handleLogout = async () => {
     await logout()
@@ -56,6 +63,12 @@ export function Dashboard() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {showTutorial && (
+        <TutorialModal onClose={() => {
+          setShowTutorial(false)
+          localStorage.setItem('hasSeenTutorial', 'true')
+        }} />
+      )}
       {/* Top Nav */}
       <nav style={{
         position: 'sticky', top: 0, zIndex: 40,
@@ -111,6 +124,21 @@ export function Dashboard() {
           ))}
 
           <div style={{ marginTop: 'auto', padding: '12px 0', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <button
+              onClick={() => setShowTutorial(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '12px 16px', borderRadius: 12,
+                background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)',
+                color: '#f59e0b',
+                cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit',
+                textAlign: 'left', width: '100%', marginBottom: 16,
+                transition: 'all 0.15s',
+              }}
+            >
+              <span style={{ fontSize: 16 }}>📖</span>
+              How to Play
+            </button>
             {profile && <RankBadge rp={rp} showProgress size="sm" />}
           </div>
         </aside>
