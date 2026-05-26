@@ -6,7 +6,7 @@
       - `id` (uuid, primary key, references auth.users)
       - `username` (text, unique)
       - `rank_points` (integer, default 0)
-      - `daank_coins` (integer, default 100)
+      - `daanik_coins` (integer, default 100)
       - `total_xp` (integer, default 0)
       - `games_played` (integer, default 0)
       - `games_won` (integer, default 0)
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   username text UNIQUE NOT NULL,
   avatar_url text,
   rank_points integer NOT NULL DEFAULT 0,
-  daank_coins integer NOT NULL DEFAULT 100,
+  daanik_coins integer NOT NULL DEFAULT 100,
   total_xp integer NOT NULL DEFAULT 0,
   games_played integer NOT NULL DEFAULT 0,
   games_won integer NOT NULL DEFAULT 0,

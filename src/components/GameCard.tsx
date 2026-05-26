@@ -61,7 +61,7 @@ export function GameCard({ card, onClick, selected, disabled, compact, faceDown 
         y: selected ? -8 : 0, 
         scale: 1 
       }}
-      whileHover={onClick && !disabled && !selected ? { y: -4, scale: 1.02, boxShadow: `0 6px 20px ${colors.border}44` } : {}}
+      whileHover={onClick && !disabled && !selected ? { y: -8, scale: 1.05, rotateY: 10, rotateX: -5, boxShadow: `0 12px 30px ${colors.border}66` } : {}}
       whileTap={onClick && !disabled ? { scale: 0.95 } : {}}
       onClick={!disabled ? onClick : undefined}
       style={{

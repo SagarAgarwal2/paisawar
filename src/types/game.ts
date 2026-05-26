@@ -81,7 +81,7 @@ export const MOGUL_RANKS: MogulRank[] = [
   { name: 'Mogul', emoji: '👑', minRP: 7000, maxRP: 14999, color: '#EAB308' },
   { name: 'Tycoon', emoji: '🏦', minRP: 15000, maxRP: 29999, color: '#F59E0B' },
   { name: 'Billionaire', emoji: '🌍', minRP: 30000, maxRP: 59999, color: '#8B5CF6' },
-  { name: 'DAANK Legend', emoji: '🚀', minRP: 60000, maxRP: Infinity, color: '#EC4899' },
+  { name: 'DAANIK Legend', emoji: '🚀', minRP: 60000, maxRP: Infinity, color: '#EC4899' },
 ]
 
 export function getRankForRP(rp: number): MogulRank {

@@ -5,8 +5,8 @@ import { formatWealth } from '../types/game'
 const FEATURE_CARDS = [
   { icon: '🎴', title: 'Real Indian Money Decisions', desc: 'Every card puts you in a situation you might face in real life. SIPs, EMIs, Tax Raids, IPOs — your choices decide your fate.' },
   { icon: '⚔️', title: 'Attack & Defend', desc: 'Play Action cards to attack rivals with Tax Raids, Market Crashes, and UPI Frauds. Counter with Defense cards.' },
-  { icon: '👑', title: 'Mogul Rank Ladder', desc: 'Climb from Rookie to DAANK Legend through 8 rank tiers. RP gained, RP lost — the ladder never lies.' },
-  { icon: '🏦', title: 'DAANK Economy', desc: 'Earn DAANK Coins, trade cards, join Guilds, and invest in the in-game stock market that mirrors player behavior.' },
+  { icon: '👑', title: 'Mogul Rank Ladder', desc: 'Climb from Rookie to DAANIK Legend through 8 rank tiers. RP gained, RP lost — the ladder never lies.' },
+  { icon: '🏦', title: 'DAANIK Economy', desc: 'Earn DAANIK Coins, trade cards, join Guilds, and invest in the in-game stock market that mirrors player behavior.' },
   { icon: '📅', title: 'Prestige Seasons', desc: '30-day seasons with unique themes — IPO Boom, Crypto Cycle, Election Economy. New rules every month.' },
   { icon: '⚡', title: 'Daily Contracts', desc: '3 contracts reset every midnight. Miss them and they\'re gone. Build your streak, earn rare cards.' },
 ]

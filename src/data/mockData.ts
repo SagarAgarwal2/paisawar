@@ -1,6 +1,6 @@
-import type { DaankStock } from '../types/database'
+import type { DaanikStock } from '../types/database'
 
-export const MOCK_STOCKS: Omit<DaankStock, 'id' | 'created_at' | 'updated_at'>[] = [
+export const MOCK_STOCKS: Omit<DaanikStock, 'id' | 'created_at' | 'updated_at'>[] = [
   { ticker: 'MSIP', name: 'MegaSIP Corp', description: 'Rises when players choose INVEST', base_price: 1240, current_price: 1340, price_change_pct: 8.06, trend: 'up' },
   { ticker: 'CSHLD', name: 'CrashShield Ltd', description: 'Rises when defense cards are played', base_price: 880, current_price: 774, price_change_pct: -12.05, trend: 'down' },
   { ticker: 'EMIF', name: 'EMI Finance', description: 'Rises when players take losses', base_price: 2100, current_price: 2562, price_change_pct: 22.0, trend: 'up' },

@@ -347,8 +347,8 @@ export const LEGENDARY_CARDS: GameCard[] = [
     ],
   },
   {
-    id: 'leg_daank_founder',
-    name: 'The DAANK Founder',
+    id: 'leg_daanik_founder',
+    name: 'The DAANIK Founder',
     type: 'decision',
     tier: 'legendary',
     flavor: 'You set the rules of the game.',
@@ -398,7 +398,8 @@ export function createGameDeck(): GameCard[] {
   return deck
 }
 
-export const DAANK_STOCKS_DATA = [
+// Daanik Market data
+export const DAANIK_STOCKS_DATA = [
   { ticker: 'MSIP', name: 'MegaSIP Corp', description: 'Rises when players choose INVEST', base_price: 1240 },
   { ticker: 'CSHLD', name: 'CrashShield Ltd', description: 'Rises when defense cards are played', base_price: 880 },
   { ticker: 'EMIF', name: 'EMI Finance', description: 'Rises when players take losses', base_price: 2100 },

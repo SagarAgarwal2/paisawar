@@ -31,10 +31,10 @@ export interface Database {
         Insert: Partial<PlayerContract> & { player_id: string; contract_id: string }
         Update: Partial<PlayerContract>
       }
-      daank_stocks: {
-        Row: DaankStock
-        Insert: Partial<DaankStock>
-        Update: Partial<DaankStock>
+      daanik_stocks: {
+        Row: DaanikStock
+        Insert: Partial<DaanikStock>
+        Update: Partial<DaanikStock>
       }
       stock_holdings: {
         Row: StockHolding
@@ -60,7 +60,7 @@ export interface Profile {
   username: string
   avatar_url: string | null
   rank_points: number
-  daank_coins: number
+  daanik_coins: number
   total_xp: number
   games_played: number
   games_won: number
@@ -133,7 +133,7 @@ export interface PlayerContract {
   created_at: string
 }
 
-export interface DaankStock {
+export interface DaanikStock {
   id: string
   ticker: string
   name: string

@@ -4,13 +4,13 @@ import { useAuth } from '../hooks/useAuth'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
 import { RankBadge } from '../components/RankBadge'
-import { MOCK_STOCKS, DAILY_CONTRACTS, SEASONS } from '../data/mockData'
+import { DAILY_CONTRACTS, SEASONS } from '../data/mockData'
 import { formatWealth } from '../types/game'
 import { supabase } from '../lib/supabase'
 
 type Tab = 'home' | 'leaderboard' | 'market' | 'contracts' | 'profile'
 
-const MOCK_HOLDINGS: Record<string, number> = { MSIP: 5, GLDR: 2, SIPA: 8 }
+import { getDeterministicMarketPrices, fetchUserHoldings, buyStock, sellStock, type MarketStock } from '../lib/market'
 
 interface LeaderboardEntry {
   id: string
@@ -23,11 +23,13 @@ interface LeaderboardEntry {
 }
 
 export function Dashboard() {
-  const { profile, logout } = useAuth()
+  const { profile, logout, refreshProfile } = useAuth()
   const navigate = useNavigate()
   const [tab, setTab] = useState<Tab>('home')
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [leaderboardLoading, setLeaderboardLoading] = useState(false)
+  const [stocks, setStocks] = useState<MarketStock[]>([])
+  const [holdings, setHoldings] = useState<Record<string, number>>({})
 
   const handleLogout = async () => {
     await logout()
@@ -36,7 +38,13 @@ export function Dashboard() {
 
   useEffect(() => {
     if (tab === 'leaderboard') fetchLeaderboard()
+    if (tab === 'market') loadMarket()
   }, [tab])
+
+  const loadMarket = async () => {
+    setStocks(getDeterministicMarketPrices())
+    setHoldings(await fetchUserHoldings())
+  }
 
   const fetchLeaderboard = async () => {
     setLeaderboardLoading(true)
@@ -50,11 +58,11 @@ export function Dashboard() {
   }
 
   const rp = profile?.rank_points ?? 0
-  const coins = profile?.daank_coins ?? 100
+  const coins = profile?.daanik_coins ?? 100
   const currentSeason = SEASONS[0]
 
-  const portfolioValue = MOCK_STOCKS.reduce((sum, stock) => {
-    const shares = MOCK_HOLDINGS[stock.ticker] ?? 0
+  const portfolioValue = stocks.reduce((sum, stock) => {
+    const shares = holdings[stock.ticker] ?? 0
     return sum + shares * stock.current_price
   }, 0)
 
@@ -92,7 +100,7 @@ export function Dashboard() {
           {([
             { id: 'home', label: 'Home', icon: '🏠' },
             { id: 'leaderboard', label: 'Leaderboard', icon: '🏆' },
-            { id: 'market', label: 'DAANK Market', icon: '📈' },
+            { id: 'market', label: 'DAANIK Market', icon: '📈' },
             { id: 'contracts', label: 'Contracts', icon: '📋' },
             { id: 'profile', label: 'Profile', icon: '👤' },
           ] as const).map(item => (
@@ -123,7 +131,7 @@ export function Dashboard() {
         <main style={{ flex: 1, padding: '24px', overflowY: 'auto', animation: 'fadeIn 0.3s ease' }}>
           {tab === 'home' && <HomeTab navigate={navigate} profile={profile} currentSeason={currentSeason} />}
           {tab === 'leaderboard' && <LeaderboardTab leaderboard={leaderboard} loading={leaderboardLoading} profile={profile} onRefresh={fetchLeaderboard} />}
-          {tab === 'market' && <MarketTab stocks={MOCK_STOCKS} holdings={MOCK_HOLDINGS} portfolioValue={portfolioValue} coins={coins} />}
+          {tab === 'market' && <MarketTab stocks={stocks} holdings={holdings} portfolioValue={portfolioValue} coins={coins} onRefresh={loadMarket} profileRefresh={refreshProfile} />}
           {tab === 'contracts' && <ContractsTab />}
           {tab === 'profile' && <ProfileTab profile={profile} />}
         </main>
@@ -268,11 +276,42 @@ function LeaderboardTab({ leaderboard, loading, profile, onRefresh }: { leaderbo
   )
 }
 
-function MarketTab({ stocks, holdings, portfolioValue, coins }: { stocks: typeof MOCK_STOCKS; holdings: Record<string, number>; portfolioValue: number; coins: number }) {
+function MarketTab({ stocks, holdings, portfolioValue, coins, onRefresh, profileRefresh }: { stocks: MarketStock[]; holdings: Record<string, number>; portfolioValue: number; coins: number; onRefresh: () => void; profileRefresh: () => void }) {
+  const [buyingTicker, setBuyingTicker] = useState<string | null>(null)
+  const [sellingTicker, setSellingTicker] = useState<string | null>(null)
+  const [errorMsg, setErrorMsg] = useState('')
+
+  const handleBuy = async (ticker: string, price: number) => {
+    setBuyingTicker(ticker)
+    setErrorMsg('')
+    try {
+      await buyStock(ticker, 1, price)
+      await profileRefresh()
+      onRefresh()
+    } catch (e: any) {
+      setErrorMsg(e.message)
+    } finally {
+      setBuyingTicker(null)
+    }
+  }
+
+  const handleSell = async (ticker: string, price: number) => {
+    setSellingTicker(ticker)
+    setErrorMsg('')
+    try {
+      await sellStock(ticker, 1, price)
+      await profileRefresh()
+      onRefresh()
+    } catch (e: any) {
+      setErrorMsg(e.message)
+    } finally {
+      setSellingTicker(null)
+    }
+  }
   return (
     <div style={{ maxWidth: 900 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>DAANK Stock Market</h2>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>DAANIK Stock Market</h2>
         <div style={{ display: 'flex', gap: 12 }}>
           <div style={{ background: '#1a2235', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '8px 16px', textAlign: 'center' }}>
             <div style={{ fontSize: 11, color: '#64748b' }}>PORTFOLIO</div>
@@ -284,6 +323,12 @@ function MarketTab({ stocks, holdings, portfolioValue, coins }: { stocks: typeof
           </div>
         </div>
       </div>
+
+      {errorMsg && (
+        <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '12px 16px', fontSize: 13, color: '#f87171', marginBottom: 20 }}>
+          {errorMsg}
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
         {stocks.map(stock => {
@@ -317,12 +362,22 @@ function MarketTab({ stocks, holdings, portfolioValue, coins }: { stocks: typeof
               )}
 
               <div style={{ display: 'flex', gap: 8 }}>
-                <button style={{ flex: 1, padding: '7px', borderRadius: 7, background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', color: '#34d399', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                  Buy
-                </button>
-                <button style={{ flex: 1, padding: '7px', borderRadius: 7, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171', fontSize: 13, fontWeight: 700, cursor: ownedShares > 0 ? 'pointer' : 'not-allowed', opacity: ownedShares > 0 ? 1 : 0.4, fontFamily: 'inherit' }}>
-                  Sell
-                </button>
+                <Button 
+                  loading={buyingTicker === stock.ticker}
+                  onClick={() => handleBuy(stock.ticker, stock.current_price)}
+                  disabled={coins < stock.current_price}
+                  style={{ flex: 1, padding: '7px', borderRadius: 7, background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', color: '#34d399', fontSize: 13, fontWeight: 700, cursor: coins >= stock.current_price ? 'pointer' : 'not-allowed', opacity: coins >= stock.current_price ? 1 : 0.4, fontFamily: 'inherit' }}
+                >
+                  Buy 1
+                </Button>
+                <Button
+                  loading={sellingTicker === stock.ticker}
+                  onClick={() => handleSell(stock.ticker, stock.current_price)}
+                  disabled={ownedShares <= 0}
+                  style={{ flex: 1, padding: '7px', borderRadius: 7, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171', fontSize: 13, fontWeight: 700, cursor: ownedShares > 0 ? 'pointer' : 'not-allowed', opacity: ownedShares > 0 ? 1 : 0.4, fontFamily: 'inherit' }}
+                >
+                  Sell 1
+                </Button>
               </div>
             </Card>
           )
@@ -413,7 +468,7 @@ function ProfileTab({ profile }: { profile: ReturnType<typeof useAuth>['profile'
             { label: 'Win Rate', value: `${winRate}%` },
             { label: 'Best Streak', value: `${profile?.max_win_streak ?? 0}🔥` },
             { label: 'Total XP', value: (profile?.total_xp ?? 0).toLocaleString() },
-            { label: 'DAANK Coins', value: `🪙 ${(profile?.daank_coins ?? 0).toLocaleString()}` },
+            { label: 'DAANIK Coins', value: `🪙 ${(profile?.daanik_coins ?? 0).toLocaleString()}` },
           ].map(stat => (
             <div key={stat.label} style={{ padding: '14px 16px', background: '#0f1524', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)' }}>
               <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>{stat.label}</div>

@@ -10,6 +10,7 @@ import {
 } from '../lib/gameEngine'
 import { pushGameState } from '../lib/multiplayerEngine'
 import { saveGameResult } from '../lib/auth'
+import Confetti from 'react-confetti'
 import { supabase } from '../lib/supabase'
 import { PlayerBoard } from '../components/game/PlayerBoard'
 import { GameLog } from '../components/game/GameLog'
@@ -327,7 +328,8 @@ export function MultiplayerGame() {
 
     return (
       <div style={{ minHeight: '100vh', background: '#0a0e1a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div style={{ width: '100%', maxWidth: 520, textAlign: 'center' }}>
+        {isWinner && <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={500} colors={['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#f1f5f9']} />}
+        <div style={{ width: '100%', maxWidth: 520, textAlign: 'center', zIndex: 10 }}>
           <div style={{ fontSize: 64, marginBottom: 16 }}>
             {isWinner ? '🏆' : placement === 2 ? '🥈' : placement === 3 ? '🥉' : '💪'}
           </div>

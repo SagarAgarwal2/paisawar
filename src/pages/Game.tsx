@@ -14,6 +14,7 @@ import { GameLog } from '../components/game/GameLog'
 import { TurnTimer } from '../components/game/TurnTimer'
 import { saveGameResult } from '../lib/auth'
 import { playSound } from '../lib/audio'
+import Confetti from 'react-confetti'
 
 type GamePhaseUI = 'setup' | 'playing' | 'decision' | 'targeting' | 'result'
 
@@ -451,7 +452,8 @@ function ResultScreen({ isWinner, placement, finalWealth, rpChange, players, mod
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0e1a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ width: '100%', maxWidth: 500, textAlign: 'center', animation: 'slideUp 0.4s ease' }}>
+      {isWinner && <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={500} colors={['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#f1f5f9']} />}
+      <div style={{ width: '100%', maxWidth: 500, textAlign: 'center', animation: 'slideUp 0.4s ease', zIndex: 10 }}>
         <div style={{ fontSize: 64, marginBottom: 16 }}>
           {isWinner ? '🏆' : placement === 2 ? '🥈' : placement === 3 ? '🥉' : '💪'}
         </div>

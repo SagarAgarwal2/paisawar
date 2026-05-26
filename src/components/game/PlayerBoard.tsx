@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import type { PlayerState } from '../../types/game'
 import { formatWealth } from '../../types/game'
 
@@ -14,12 +15,32 @@ interface PlayerBoardProps {
 
 export function PlayerBoard({ player, isCurrent, isMe, isTarget, isOffline, wealthGoal, onClick }: PlayerBoardProps) {
   const wealthPct = Math.min(100, (player.wealth / wealthGoal) * 100)
+  
+  const [prevWealth, setPrevWealth] = useState(player.wealth)
+  const [floatingText, setFloatingText] = useState<{ id: number; diff: number }[]>([])
+  const [isShaking, setIsShaking] = useState(false)
+
+  useEffect(() => {
+    if (player.wealth !== prevWealth) {
+      const diff = player.wealth - prevWealth
+      setPrevWealth(player.wealth)
+      
+      if (diff !== 0) {
+        setFloatingText(prev => [...prev, { id: Date.now(), diff }])
+        if (diff < 0) {
+          setIsShaking(true)
+          setTimeout(() => setIsShaking(false), 500)
+        }
+      }
+    }
+  }, [player.wealth, prevWealth])
 
   return (
     <motion.div
       layout
       initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
+      animate={{ opacity: 1, scale: 1, x: isShaking ? [-6, 6, -6, 6, -3, 3, 0] : 0 }}
+      transition={{ x: { duration: 0.4 } }}
       whileHover={isTarget ? { scale: 1.02, backgroundColor: 'rgba(239,68,68,0.08)' } : {}}
       whileTap={isTarget ? { scale: 0.95 } : {}}
       onClick={isTarget ? onClick : undefined}
@@ -31,6 +52,28 @@ export function PlayerBoard({ player, isCurrent, isMe, isTarget, isOffline, weal
         position: 'relative',
       }}
     >
+      <AnimatePresence>
+        {floatingText.map(ft => (
+          <motion.div
+            key={ft.id}
+            initial={{ opacity: 1, y: 0, scale: 1 }}
+            animate={{ opacity: 0, y: -40, scale: 1.2 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: 'easeOut' }}
+            style={{
+              position: 'absolute', top: 30, right: 20,
+              fontSize: 18, fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif',
+              color: ft.diff > 0 ? '#10b981' : '#ef4444',
+              pointerEvents: 'none', zIndex: 10,
+              textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+            }}
+            onAnimationComplete={() => setFloatingText(prev => prev.filter(item => item.id !== ft.id))}
+          >
+            {ft.diff > 0 ? '+' : ''}₹{Math.abs(ft.diff).toLocaleString()}
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
       {isCurrent && !isOffline && (
         <div style={{
           position: 'absolute', top: -9, right: 10,
