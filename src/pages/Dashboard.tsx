@@ -10,7 +10,6 @@ import { supabase } from '../lib/supabase'
 
 type Tab = 'home' | 'leaderboard' | 'market' | 'contracts' | 'profile'
 
-import { getDeterministicMarketPrices, fetchUserHoldings, buyStock, sellStock, type MarketStock } from '../lib/market'
 
 interface LeaderboardEntry {
   id: string
@@ -23,13 +22,12 @@ interface LeaderboardEntry {
 }
 
 export function Dashboard() {
-  const { profile, logout, refreshProfile } = useAuth()
+  const { profile, logout } = useAuth()
   const navigate = useNavigate()
   const [tab, setTab] = useState<Tab>('home')
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [leaderboardLoading, setLeaderboardLoading] = useState(false)
-  const [stocks, setStocks] = useState<MarketStock[]>([])
-  const [holdings, setHoldings] = useState<Record<string, number>>({})
+
 
   const handleLogout = async () => {
     await logout()
@@ -38,13 +36,7 @@ export function Dashboard() {
 
   useEffect(() => {
     if (tab === 'leaderboard') fetchLeaderboard()
-    if (tab === 'market') loadMarket()
   }, [tab])
-
-  const loadMarket = async () => {
-    setStocks(getDeterministicMarketPrices())
-    setHoldings(await fetchUserHoldings())
-  }
 
   const fetchLeaderboard = async () => {
     setLeaderboardLoading(true)
@@ -61,10 +53,6 @@ export function Dashboard() {
   const coins = profile?.daanik_coins ?? 100
   const currentSeason = SEASONS[0]
 
-  const portfolioValue = stocks.reduce((sum, stock) => {
-    const shares = holdings[stock.ticker] ?? 0
-    return sum + shares * stock.current_price
-  }, 0)
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -101,7 +89,6 @@ export function Dashboard() {
           {([
             { id: 'home', label: 'Home', icon: '🏠' },
             { id: 'leaderboard', label: 'Leaderboard', icon: '🏆' },
-            { id: 'market', label: 'DAANIK Market', icon: '📈' },
             { id: 'contracts', label: 'Contracts', icon: '📋' },
             { id: 'profile', label: 'Profile', icon: '👤' },
           ] as const).map(item => (
@@ -132,7 +119,6 @@ export function Dashboard() {
         <main style={{ flex: 1, padding: '24px', overflowY: 'auto', animation: 'fadeIn 0.3s ease' }}>
           {tab === 'home' && <HomeTab navigate={navigate} profile={profile} currentSeason={currentSeason} />}
           {tab === 'leaderboard' && <LeaderboardTab leaderboard={leaderboard} loading={leaderboardLoading} profile={profile} onRefresh={fetchLeaderboard} />}
-          {tab === 'market' && <MarketTab stocks={stocks} holdings={holdings} portfolioValue={portfolioValue} coins={coins} onRefresh={loadMarket} profileRefresh={refreshProfile} />}
           {tab === 'contracts' && <ContractsTab />}
           {tab === 'profile' && <ProfileTab profile={profile} />}
         </main>
@@ -277,116 +263,6 @@ function LeaderboardTab({ leaderboard, loading, profile, onRefresh }: { leaderbo
   )
 }
 
-function MarketTab({ stocks, holdings, portfolioValue, coins, onRefresh, profileRefresh }: { stocks: MarketStock[]; holdings: Record<string, number>; portfolioValue: number; coins: number; onRefresh: () => void; profileRefresh: () => void }) {
-  const [buyingTicker, setBuyingTicker] = useState<string | null>(null)
-  const [sellingTicker, setSellingTicker] = useState<string | null>(null)
-  const [errorMsg, setErrorMsg] = useState('')
-
-  const handleBuy = async (ticker: string, price: number) => {
-    setBuyingTicker(ticker)
-    setErrorMsg('')
-    try {
-      await buyStock(ticker, 1, price)
-      await profileRefresh()
-      onRefresh()
-    } catch (e: any) {
-      setErrorMsg(e.message)
-    } finally {
-      setBuyingTicker(null)
-    }
-  }
-
-  const handleSell = async (ticker: string, price: number) => {
-    setSellingTicker(ticker)
-    setErrorMsg('')
-    try {
-      await sellStock(ticker, 1, price)
-      await profileRefresh()
-      onRefresh()
-    } catch (e: any) {
-      setErrorMsg(e.message)
-    } finally {
-      setSellingTicker(null)
-    }
-  }
-  return (
-    <div style={{ maxWidth: 900 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>DAANIK Stock Market</h2>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <div className="glass-panel" style={{ borderRadius: 12, padding: '8px 16px', textAlign: 'center', boxShadow: 'none' }}>
-            <div style={{ fontSize: 11, color: '#64748b', letterSpacing: '0.05em', fontWeight: 600 }}>PORTFOLIO</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#10b981', fontFamily: 'Space Grotesk, sans-serif' }}>{formatWealth(portfolioValue)}</div>
-          </div>
-          <div className="glass-panel" style={{ borderRadius: 12, padding: '8px 16px', textAlign: 'center', boxShadow: 'none' }}>
-            <div style={{ fontSize: 11, color: '#64748b', letterSpacing: '0.05em', fontWeight: 600 }}>COINS</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif' }}>🪙 {coins}</div>
-          </div>
-        </div>
-      </div>
-
-      {errorMsg && (
-        <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '12px 16px', fontSize: 13, color: '#f87171', marginBottom: 20 }}>
-          {errorMsg}
-        </div>
-      )}
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
-        {stocks.map(stock => {
-          const ownedShares = holdings[stock.ticker] ?? 0
-          const isUp = stock.trend === 'up'
-          const isDown = stock.trend === 'down'
-
-          return (
-            <Card key={stock.ticker} style={{ padding: 20 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: '#94a3b8', letterSpacing: '0.05em', marginBottom: 2 }}>{stock.ticker}</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>{stock.name}</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>
-                    ₹{stock.current_price.toLocaleString()}
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: isUp ? '#10b981' : isDown ? '#ef4444' : '#94a3b8' }}>
-                    {isUp ? '↑' : isDown ? '↓' : '→'} {Math.abs(stock.price_change_pct).toFixed(1)}%
-                  </div>
-                </div>
-              </div>
-
-              <p style={{ fontSize: 12, color: '#64748b', marginBottom: 12, lineHeight: 1.4 }}>{stock.description}</p>
-
-              {ownedShares > 0 && (
-                <div style={{ padding: '6px 10px', borderRadius: 6, background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', marginBottom: 12, fontSize: 12, color: '#34d399' }}>
-                  You own {ownedShares} shares — {formatWealth(ownedShares * stock.current_price)}
-                </div>
-              )}
-
-              <div style={{ display: 'flex', gap: 8 }}>
-                <Button 
-                  loading={buyingTicker === stock.ticker}
-                  onClick={() => handleBuy(stock.ticker, stock.current_price)}
-                  disabled={coins < stock.current_price}
-                  style={{ flex: 1, padding: '7px', borderRadius: 7, background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', color: '#34d399', fontSize: 13, fontWeight: 700, cursor: coins >= stock.current_price ? 'pointer' : 'not-allowed', opacity: coins >= stock.current_price ? 1 : 0.4, fontFamily: 'inherit' }}
-                >
-                  Buy 1
-                </Button>
-                <Button
-                  loading={sellingTicker === stock.ticker}
-                  onClick={() => handleSell(stock.ticker, stock.current_price)}
-                  disabled={ownedShares <= 0}
-                  style={{ flex: 1, padding: '7px', borderRadius: 7, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171', fontSize: 13, fontWeight: 700, cursor: ownedShares > 0 ? 'pointer' : 'not-allowed', opacity: ownedShares > 0 ? 1 : 0.4, fontFamily: 'inherit' }}
-                >
-                  Sell 1
-                </Button>
-              </div>
-            </Card>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
 
 function ContractsTab() {
   const contracts = DAILY_CONTRACTS
