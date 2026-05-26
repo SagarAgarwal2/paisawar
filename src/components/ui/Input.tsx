@@ -9,7 +9,7 @@ export function Input({ label, error, id, style, ...props }: InputProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
       {label && (
-        <label htmlFor={id} style={{ fontSize: '13px', fontWeight: 500, color: '#94a3b8' }}>
+        <label htmlFor={id} style={{ fontSize: '16px', fontWeight: 500, color: '#94a3b8' }}>
           {label}
         </label>
       )}
@@ -21,7 +21,7 @@ export function Input({ label, error, id, style, ...props }: InputProps) {
           borderRadius: '10px',
           padding: '10px 14px',
           color: '#f1f5f9',
-          fontSize: '14px',
+          fontSize: '18px',
           outline: 'none',
           width: '100%',
           transition: 'border-color 0.2s',
@@ -31,7 +31,7 @@ export function Input({ label, error, id, style, ...props }: InputProps) {
         onBlur={(e) => { e.target.style.borderColor = error ? '#ef4444' : 'rgba(255,255,255,0.1)'; }}
         {...props}
       />
-      {error && <span style={{ fontSize: '12px', color: '#ef4444' }}>{error}</span>}
+      {error && <span style={{ fontSize: '15px', color: '#ef4444' }}>{error}</span>}
     </div>
   )
 }

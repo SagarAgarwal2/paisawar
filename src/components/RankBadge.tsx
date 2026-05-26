@@ -33,7 +33,7 @@ export function RankBadge({ rp, showProgress, size = 'md' }: RankBadgeProps) {
         </div>
       )}
       {showProgress && nextRank && (
-        <div style={{ fontSize: 11, color: '#64748b' }}>{rank.maxRP - rp} RP to next rank</div>
+        <div style={{ fontSize: 14, color: '#64748b' }}>{rank.maxRP - rp} RP to next rank</div>
       )}
     </div>
   )

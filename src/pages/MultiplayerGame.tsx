@@ -335,7 +335,7 @@ export function MultiplayerGame() {
           borderTopColor: '#f59e0b',
           animation: 'spin 0.8s linear infinite',
         }} />
-        <div style={{ color: '#64748b', fontSize: 14 }}>Loading game...</div>
+        <div style={{ color: '#64748b', fontSize: 18 }}>Loading game...</div>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     )
@@ -352,18 +352,18 @@ export function MultiplayerGame() {
       <div style={{ minHeight: '100vh', background: '#0a0e1a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         {isWinner && <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={500} colors={['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#f1f5f9']} />}
         <div style={{ width: '100%', maxWidth: 520, textAlign: 'center', zIndex: 10 }}>
-          <div style={{ fontSize: 64, marginBottom: 16 }}>
+          <div style={{ fontSize: 80, marginBottom: 16 }}>
             {isWinner ? '🏆' : placement === 2 ? '🥈' : placement === 3 ? '🥉' : '💪'}
           </div>
-          <h1 style={{ fontSize: 32, fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif', color: isWinner ? '#f59e0b' : '#f1f5f9', marginBottom: 8 }}>
+          <h1 style={{ fontSize: 40, fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif', color: isWinner ? '#f59e0b' : '#f1f5f9', marginBottom: 8 }}>
             {isWinner ? 'Victory!' : `${placement}${ordinal} Place`}
           </h1>
-          <p style={{ color: '#94a3b8', marginBottom: 28, fontSize: 16 }}>
+          <p style={{ color: '#94a3b8', marginBottom: 28, fontSize: 20 }}>
             Final wealth: {formatWealth(myFinalPlayer?.wealth ?? 0)}
           </p>
 
           <div style={{ background: '#1a2235', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 20, marginBottom: 24 }}>
-            <h3 style={{ fontSize: 13, fontWeight: 700, color: '#475569', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: '#475569', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Final Rankings
             </h3>
             {sorted.map((p, i) => (
@@ -373,18 +373,18 @@ export function MultiplayerGame() {
                 borderBottom: i < sorted.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 20, width: 28 }}>
+                  <span style={{ fontSize: 25, width: 28 }}>
                     {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
                   </span>
                   <span style={{
-                    fontSize: 14,
+                    fontSize: 18,
                     fontWeight: p.id === myPlayerId ? 700 : 500,
                     color: p.id === myPlayerId ? '#60a5fa' : '#f1f5f9',
                   }}>
                     {p.name}{p.id === myPlayerId ? ' (you)' : ''}
                   </span>
                 </div>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#10b981', fontFamily: 'Space Grotesk, sans-serif' }}>
+                <span style={{ fontSize: 18, fontWeight: 700, color: '#10b981', fontFamily: 'Space Grotesk, sans-serif' }}>
                   {formatWealth(p.wealth)}
                 </span>
               </div>
@@ -409,14 +409,14 @@ export function MultiplayerGame() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         borderRadius: 0, borderTop: 'none', borderLeft: 'none', borderRight: 'none',
       }}>
-        <button onClick={() => setShowForfeitModal(true)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <button onClick={() => setShowForfeitModal(true)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 16, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}>
           ← Leave Match
         </button>
-        <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: 16, color: '#f59e0b', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+        <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: 20, color: '#f59e0b', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
           PAISA WAR
         </div>
         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-          <span style={{ padding: '3px 10px', borderRadius: 5, background: 'rgba(16,185,129,0.15)', color: '#34d399', fontSize: 11, fontWeight: 700 }}>
+          <span style={{ padding: '3px 10px', borderRadius: 5, background: 'rgba(16,185,129,0.15)', color: '#34d399', fontSize: 14, fontWeight: 700 }}>
             🌐 ONLINE
           </span>
         </div>
@@ -437,7 +437,7 @@ export function MultiplayerGame() {
             position: 'fixed', top: 68, right: 20,
             background: '#1e293b', border: '1px solid rgba(255,255,255,0.12)',
             borderRadius: 10, padding: '11px 18px',
-            fontSize: 14, color: '#f1f5f9', zIndex: 200,
+            fontSize: 18, color: '#f1f5f9', zIndex: 200,
             boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
           }}>
             {notification}
@@ -469,10 +469,10 @@ export function MultiplayerGame() {
           borderRadius: 16, padding: '24px', minHeight: 200, boxShadow: 'none'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <h2 style={{ margin: 0, fontSize: 18, color: '#f1f5f9', fontWeight: 700 }}>
+            <h2 style={{ margin: 0, fontSize: 23, color: '#f1f5f9', fontWeight: 700 }}>
               {isMyTurn ? <span style={{ color: '#60a5fa' }}>Your Turn</span> : <span>{currentPlayer?.name}'s Turn</span>}
             </h2>
-            <div style={{ fontSize: 12, color: '#475569', fontWeight: 700 }}>TURN {gameState.turn}</div>
+            <div style={{ fontSize: 15, color: '#475569', fontWeight: 700 }}>TURN {gameState.turn}</div>
           </div>
           
           <TurnTimer 
@@ -485,15 +485,15 @@ export function MultiplayerGame() {
           {/* Not my turn */}
           {!isMyTurn && uiPhase === 'playing' && (
             <div style={{ textAlign: 'center', padding: '36px 0' }}>
-              <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
-              <div style={{ fontSize: 15, fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>⏳</div>
+              <div style={{ fontSize: 19, fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>
                 Waiting for {currentPlayer?.name}...
               </div>
-              <div style={{ fontSize: 13, color: '#475569' }}>Their turn to play</div>
+              <div style={{ fontSize: 16, color: '#475569' }}>Their turn to play</div>
               {/* Show my hand while waiting */}
               {myPlayer && myPlayer.hand.length > 0 && (
                 <div style={{ marginTop: 20, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16 }}>
-                  <p style={{ fontSize: 12, color: '#475569', marginBottom: 10 }}>
+                  <p style={{ fontSize: 15, color: '#475569', marginBottom: 10 }}>
                     Your hand ({myPlayer.hand.length} cards):
                   </p>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -509,7 +509,7 @@ export function MultiplayerGame() {
           {/* Draw phase */}
           {isMyTurn && gameState.phase === 'draw' && (
             <div style={{ textAlign: 'center', padding: '28px 0' }}>
-              <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 18 }}>
+              <div style={{ fontSize: 16, color: '#94a3b8', marginBottom: 18 }}>
                 Your turn! Draw a card to start.
               </div>
               <Button size="lg" variant="gold" onClick={handleDrawCard}>
@@ -517,7 +517,7 @@ export function MultiplayerGame() {
               </Button>
               {myPlayer && myPlayer.hand.length > 0 && (
                 <div style={{ marginTop: 20, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16 }}>
-                  <p style={{ fontSize: 12, color: '#475569', marginBottom: 10 }}>Your current hand:</p>
+                  <p style={{ fontSize: 15, color: '#475569', marginBottom: 10 }}>Your current hand:</p>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
                     {myPlayer.hand.map(card => (
                       <GameCard key={card.id} card={card} compact disabled />
@@ -532,7 +532,7 @@ export function MultiplayerGame() {
           {isMyTurn && gameState.phase === 'play' && (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <p style={{ fontSize: 13, color: '#94a3b8' }}>
+                <p style={{ fontSize: 16, color: '#94a3b8' }}>
                   {gameState.drawnCard ? `Drew "${gameState.drawnCard.name}" — pick a card to play:` : 'Pick a card to play:'}
                 </p>
               </div>
@@ -548,10 +548,10 @@ export function MultiplayerGame() {
           {uiPhase === 'decision' && gameState.pendingDecision && (
             <div>
               <div style={{ marginBottom: 16 }}>
-                <h3 style={{ fontSize: 17, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif', marginBottom: 4 }}>
+                <h3 style={{ fontSize: 21, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif', marginBottom: 4 }}>
                   {gameState.pendingDecision.card.name}
                 </h3>
-                <p style={{ fontSize: 13, color: '#475569' }}>{gameState.pendingDecision.card.flavor}</p>
+                <p style={{ fontSize: 16, color: '#475569' }}>{gameState.pendingDecision.card.flavor}</p>
               </div>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 {gameState.pendingDecision.card.options?.map(opt => {
@@ -581,15 +581,15 @@ export function MultiplayerGame() {
                         ;(e.currentTarget as HTMLButtonElement).style.borderColor = `${c.border}55`
                       }}
                     >
-                      <div style={{ fontSize: 10, fontWeight: 800, color: c.border, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>
+                      <div style={{ fontSize: 13, fontWeight: 800, color: c.border, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>
                         {opt.type}
                       </div>
-                      <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>{opt.label}</div>
-                      <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 8 }}>{opt.description}</div>
-                      <div style={{ fontSize: 15, fontWeight: 800, color: val >= 0 ? '#10b981' : '#ef4444', fontFamily: 'Space Grotesk, sans-serif' }}>
+                      <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>{opt.label}</div>
+                      <div style={{ fontSize: 15, color: '#94a3b8', marginBottom: 8 }}>{opt.description}</div>
+                      <div style={{ fontSize: 19, fontWeight: 800, color: val >= 0 ? '#10b981' : '#ef4444', fontFamily: 'Space Grotesk, sans-serif' }}>
                         {val >= 0 ? '+' : ''}{formatWealth(Math.abs(val))}
-                        {opt.effect.type === 'wealth_next_turn' && <span style={{ fontSize: 10, color: '#475569', fontWeight: 400, marginLeft: 4 }}>next turn</span>}
-                        {opt.effect.type === 'wealth_end_game' && <span style={{ fontSize: 10, color: '#475569', fontWeight: 400, marginLeft: 4 }}>at end</span>}
+                        {opt.effect.type === 'wealth_next_turn' && <span style={{ fontSize: 13, color: '#475569', fontWeight: 400, marginLeft: 4 }}>next turn</span>}
+                        {opt.effect.type === 'wealth_end_game' && <span style={{ fontSize: 13, color: '#475569', fontWeight: 400, marginLeft: 4 }}>at end</span>}
                       </div>
                     </button>
                   )
@@ -601,16 +601,16 @@ export function MultiplayerGame() {
           {/* Targeting */}
           {uiPhase === 'targeting' && gameState.pendingTarget && (
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
-              <div style={{ fontSize: 28, marginBottom: 10 }}>⚡</div>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: '#ef4444', marginBottom: 6, fontFamily: 'Space Grotesk, sans-serif' }}>
+              <div style={{ fontSize: 35, marginBottom: 10 }}>⚡</div>
+              <h3 style={{ fontSize: 21, fontWeight: 800, color: '#ef4444', marginBottom: 6, fontFamily: 'Space Grotesk, sans-serif' }}>
                 {gameState.pendingTarget.card.name}
               </h3>
-              <p style={{ fontSize: 13, color: '#94a3b8', marginBottom: 20 }}>
+              <p style={{ fontSize: 16, color: '#94a3b8', marginBottom: 20 }}>
                 Click on an opponent above to attack them
               </p>
               {defenseCards.length > 0 && (
                 <div style={{ marginBottom: 16 }}>
-                  <p style={{ fontSize: 12, color: '#475569', marginBottom: 8 }}>Or defend yourself:</p>
+                  <p style={{ fontSize: 15, color: '#475569', marginBottom: 8 }}>Or defend yourself:</p>
                   <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
                     {defenseCards.map(dc => (
                       <GameCard key={dc.id} card={dc} compact onClick={() => handleDefend(dc)} />

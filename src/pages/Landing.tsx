@@ -31,11 +31,11 @@ export function Landing() {
         backdropFilter: 'blur(12px)',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}>
-        <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: 20, color: '#f59e0b', letterSpacing: '-0.02em' }}>
+        <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: 25, color: '#f59e0b', letterSpacing: '-0.02em' }}>
           PAISA WAR
         </div>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <Link to="/auth" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>Sign In</Link>
+          <Link to="/auth" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: 18, fontWeight: 500 }}>Sign In</Link>
           <Link to="/auth?mode=register">
             <Button size="sm">Play Now</Button>
           </Link>
@@ -56,7 +56,7 @@ export function Landing() {
         <div style={{ animation: 'fadeIn 0.6s ease forwards', position: 'relative' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 999, border: '1px solid rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.08)', marginBottom: 24 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f59e0b', display: 'inline-block', animation: 'pulse 2s infinite' }} />
-            <span style={{ fontSize: 12, color: '#f59e0b', fontWeight: 600, letterSpacing: '0.05em' }}>THE MONEY DECISION GAME</span>
+            <span style={{ fontSize: 15, color: '#f59e0b', fontWeight: 600, letterSpacing: '0.05em' }}>THE MONEY DECISION GAME</span>
           </div>
 
           <h1 style={{ fontSize: 'clamp(48px, 8vw, 88px)', fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif', lineHeight: 1.05, letterSpacing: '-0.03em', marginBottom: 24 }}>
@@ -94,10 +94,10 @@ export function Landing() {
               boxShadow: `0 8px 24px ${card.color}22`,
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: 11, color: card.color, fontWeight: 700 }}>{card.icon} {card.type.toUpperCase()}</span>
-                <span style={{ fontSize: 8, fontWeight: 700, padding: '1px 4px', borderRadius: 3, background: card.color, color: '#fff' }}>{card.tier[0]}</span>
+                <span style={{ fontSize: 14, color: card.color, fontWeight: 700 }}>{card.icon} {card.type.toUpperCase()}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 4px', borderRadius: 3, background: card.color, color: '#fff' }}>{card.tier[0]}</span>
               </div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif', lineHeight: 1.2 }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif', lineHeight: 1.2 }}>
                 {card.name}
               </div>
               <div style={{ flex: 1, borderRadius: 6, background: 'rgba(255,255,255,0.03)', border: `1px solid ${card.color}22` }} />
@@ -116,8 +116,8 @@ export function Landing() {
             { label: 'Game Time', value: '20-30 min' },
           ].map(stat => (
             <div key={stat.label}>
-              <div style={{ fontSize: 28, fontWeight: 800, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif' }}>{stat.value}</div>
-              <div style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>{stat.label}</div>
+              <div style={{ fontSize: 35, fontWeight: 800, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif' }}>{stat.value}</div>
+              <div style={{ fontSize: 16, color: '#64748b', marginTop: 4 }}>{stat.label}</div>
             </div>
           ))}
         </div>
@@ -125,7 +125,7 @@ export function Landing() {
 
       {/* Features */}
       <section style={{ padding: '80px 24px', maxWidth: 1100, margin: '0 auto' }}>
-        <h2 style={{ textAlign: 'center', fontSize: 36, fontFamily: 'Space Grotesk, sans-serif', color: '#f1f5f9', marginBottom: 8 }}>Why Paisa War?</h2>
+        <h2 style={{ textAlign: 'center', fontSize: 45, fontFamily: 'Space Grotesk, sans-serif', color: '#f1f5f9', marginBottom: 8 }}>Why Paisa War?</h2>
         <p style={{ textAlign: 'center', color: '#64748b', marginBottom: 56 }}>Everything you love about competitive card games, built around Indian financial life.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
           {FEATURE_CARDS.map(f => (
@@ -136,9 +136,9 @@ export function Landing() {
             onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.2)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)' }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.08)'; (e.currentTarget as HTMLDivElement).style.transform = 'none' }}
             >
-              <div style={{ fontSize: 32, marginBottom: 12 }}>{f.icon}</div>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#f1f5f9', marginBottom: 8, fontFamily: 'Space Grotesk, sans-serif' }}>{f.title}</h3>
-              <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.6 }}>{f.desc}</p>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>{f.icon}</div>
+              <h3 style={{ fontSize: 20, fontWeight: 700, color: '#f1f5f9', marginBottom: 8, fontFamily: 'Space Grotesk, sans-serif' }}>{f.title}</h3>
+              <p style={{ fontSize: 18, color: '#64748b', lineHeight: 1.6 }}>{f.desc}</p>
             </div>
           ))}
         </div>
@@ -146,15 +146,15 @@ export function Landing() {
 
       {/* CTA */}
       <section className="glass-panel" style={{ padding: '80px 24px', textAlign: 'center', borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}>
-        <h2 style={{ fontSize: 40, fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, color: '#f1f5f9', marginBottom: 16 }}>Ready to build your empire?</h2>
-        <p style={{ color: '#94a3b8', fontSize: 18, marginBottom: 40 }}>Join thousands of players racing to ₹50 Lakhs.</p>
+        <h2 style={{ fontSize: 50, fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, color: '#f1f5f9', marginBottom: 16 }}>Ready to build your empire?</h2>
+        <p style={{ color: '#94a3b8', fontSize: 23, marginBottom: 40 }}>Join thousands of players racing to ₹50 Lakhs.</p>
         <Link to="/auth?mode=register">
           <Button size="lg" variant="gold">Play Now — It's Free</Button>
         </Link>
       </section>
 
       {/* Footer */}
-      <footer style={{ padding: '32px 24px', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center', color: '#64748b', fontSize: 14 }}>
+      <footer style={{ padding: '32px 24px', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center', color: '#64748b', fontSize: 18 }}>
         <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, color: '#f59e0b', marginBottom: 8 }}>PAISA WAR</div>
         <div>The Money Decision Game — For entertainment & financial literacy purposes.</div>
       </footer>

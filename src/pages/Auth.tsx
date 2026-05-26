@@ -50,14 +50,14 @@ export function Auth() {
       <div style={{ width: '100%', maxWidth: 400, position: 'relative', animation: 'slideUp 0.4s ease forwards' }}>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <Link to="/" style={{ textDecoration: 'none' }}>
-            <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: 28, color: '#f59e0b', letterSpacing: '-0.02em', marginBottom: 8 }}>
+            <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: 35, color: '#f59e0b', letterSpacing: '-0.02em', marginBottom: 8 }}>
               PAISA WAR
             </div>
           </Link>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', marginBottom: 6 }}>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: '#f1f5f9', marginBottom: 6 }}>
             {mode === 'login' ? 'Welcome back' : 'Join the game'}
           </h1>
-          <p style={{ fontSize: 14, color: '#64748b' }}>
+          <p style={{ fontSize: 18, color: '#64748b' }}>
             {mode === 'login' ? 'Sign in to your account' : 'Create your account to start playing'}
           </p>
         </div>
@@ -73,7 +73,7 @@ export function Auth() {
                   flex: 1, padding: '8px 16px', borderRadius: 7, border: 'none', cursor: 'pointer',
                   background: mode === m ? '#2563eb' : 'transparent',
                   color: mode === m ? '#fff' : '#64748b',
-                  fontSize: 14, fontWeight: 600, transition: 'all 0.2s', fontFamily: 'inherit',
+                  fontSize: 18, fontWeight: 600, transition: 'all 0.2s', fontFamily: 'inherit',
                 }}
               >
                 {m === 'login' ? 'Sign In' : 'Register'}
@@ -114,7 +114,7 @@ export function Auth() {
             />
 
             {error && (
-              <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#f87171' }}>
+              <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, padding: '10px 14px', fontSize: 16, color: '#f87171' }}>
                 {error}
               </div>
             )}
@@ -125,11 +125,11 @@ export function Auth() {
           </form>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: 20, fontSize: 13, color: '#64748b' }}>
+        <p style={{ textAlign: 'center', marginTop: 20, fontSize: 16, color: '#64748b' }}>
           {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
           <button
             onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError('') }}
-            style={{ color: '#60a5fa', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600 }}
+            style={{ color: '#60a5fa', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 16, fontWeight: 600 }}
           >
             {mode === 'login' ? 'Register' : 'Sign In'}
           </button>

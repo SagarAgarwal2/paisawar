@@ -135,7 +135,7 @@ export function GameCard({ card, onClick, selected, disabled, compact, faceDown 
           {TYPE_ICONS[card.type]} {compact ? '' : card.type}
         </span>
         <span style={{
-          fontSize: 8,
+          fontSize: 10,
           fontWeight: 800,
           padding: '2px 6px',
           borderRadius: 4,
@@ -154,7 +154,7 @@ export function GameCard({ card, onClick, selected, disabled, compact, faceDown 
       </div>
 
       {!compact && (
-        <div style={{ fontSize: 10, color: '#64748b', lineHeight: 1.4, flexGrow: 1, overflow: 'hidden' }}>
+        <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.4, flexGrow: 1, overflow: 'hidden' }}>
           {card.flavor}
         </div>
       )}
@@ -163,10 +163,10 @@ export function GameCard({ card, onClick, selected, disabled, compact, faceDown 
       {!compact && card.type === 'decision' && card.options && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {card.options.map(opt => (
-            <div key={opt.type} style={{ fontSize: 9, padding: '2px 4px', borderRadius: 4, background: 'rgba(255,255,255,0.05)', color: opt.type === 'invest' ? '#34d399' : opt.type === 'save' ? '#60a5fa' : '#f87171', display: 'flex', justifyContent: 'space-between' }}>
+            <div key={opt.type} style={{ fontSize: 11, padding: '2px 4px', borderRadius: 4, background: 'rgba(255,255,255,0.05)', color: opt.type === 'invest' ? '#34d399' : opt.type === 'save' ? '#60a5fa' : '#f87171', display: 'flex', justifyContent: 'space-between' }}>
               <span>{opt.type.toUpperCase()}: {opt.label}</span>
               {opt.type === 'invest' && opt.investRisk && (
-                <span style={{ color: '#f97316', fontSize: 8 }}>⚠️ {opt.investRisk}% fail</span>
+                <span style={{ color: '#f97316', fontSize: 10 }}>⚠️ {opt.investRisk}% fail</span>
               )}
             </div>
           ))}

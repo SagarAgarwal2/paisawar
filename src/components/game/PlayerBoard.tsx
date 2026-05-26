@@ -64,7 +64,7 @@ export function PlayerBoard({ player, isCurrent, isMe, isTarget, isOffline, weal
             transition={{ duration: 1.5, ease: 'easeOut' }}
             style={{
               position: 'absolute', top: 30, right: 20,
-              fontSize: 18, fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif',
+              fontSize: 23, fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif',
               color: ft.diff > 0 ? '#10b981' : '#ef4444',
               pointerEvents: 'none', zIndex: 10,
               textShadow: '0 2px 4px rgba(0,0,0,0.5)'
@@ -79,7 +79,7 @@ export function PlayerBoard({ player, isCurrent, isMe, isTarget, isOffline, weal
       {isCurrent && !isOffline && (
         <div className="glass-pill" style={{
           position: 'absolute', top: -12, right: 10,
-          fontSize: 9, fontWeight: 700, color: '#60a5fa',
+          fontSize: 11, fontWeight: 700, color: '#60a5fa',
           padding: '4px 10px',
           letterSpacing: '0.1em',
         }}>
@@ -89,7 +89,7 @@ export function PlayerBoard({ player, isCurrent, isMe, isTarget, isOffline, weal
       {isOffline && (
         <div className="glass-pill" style={{
           position: 'absolute', top: -12, right: 10,
-          fontSize: 9, fontWeight: 700, color: '#94a3b8',
+          fontSize: 11, fontWeight: 700, color: '#94a3b8',
           padding: '4px 10px',
           letterSpacing: '0.1em',
         }}>
@@ -98,18 +98,18 @@ export function PlayerBoard({ player, isCurrent, isMe, isTarget, isOffline, weal
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, opacity: isOffline ? 0.5 : 1 }}>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: isMe ? '#60a5fa' : '#e2e8f0', fontFamily: 'Space Grotesk, sans-serif' }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: isMe ? '#60a5fa' : '#e2e8f0', fontFamily: 'Space Grotesk, sans-serif' }}>
             {player.name}{isMe ? ' (You)' : player.isBot ? ' 🤖' : ''}
           </div>
-          <div style={{ fontSize: 10, color: '#475569', marginTop: 1 }}>{player.hand.length} cards in hand</div>
+          <div style={{ fontSize: 13, color: '#475569', marginTop: 1 }}>{player.hand.length} cards in hand</div>
         </div>
         {player.skippedTurns > 0 && (
-          <span style={{ fontSize: 10, color: '#f59e0b', background: 'rgba(245,158,11,0.12)', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>
+          <span style={{ fontSize: 13, color: '#f59e0b', background: 'rgba(245,158,11,0.12)', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>
             SKIP×{player.skippedTurns}
           </span>
         )}
       </div>
-      <div style={{ fontSize: 19, fontWeight: 800, color: '#10b981', fontFamily: 'Space Grotesk, sans-serif', marginBottom: 8 }}>
+      <div style={{ fontSize: 24, fontWeight: 800, color: '#10b981', fontFamily: 'Space Grotesk, sans-serif', marginBottom: 8 }}>
         {formatWealth(player.wealth)}
       </div>
       <div style={{ height: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
@@ -119,9 +119,9 @@ export function PlayerBoard({ player, isCurrent, isMe, isTarget, isOffline, weal
           borderRadius: 3, transition: 'width 0.5s ease',
         }} />
       </div>
-      <div style={{ fontSize: 10, color: '#475569', marginTop: 3 }}>{wealthPct.toFixed(1)}% to goal</div>
+      <div style={{ fontSize: 13, color: '#475569', marginTop: 3 }}>{wealthPct.toFixed(1)}% to goal</div>
       {isTarget && (
-        <div style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: '#ef4444', textAlign: 'center' }}>
+        <div style={{ marginTop: 8, fontSize: 14, fontWeight: 700, color: '#ef4444', textAlign: 'center' }}>
           ⚡ Click to attack
         </div>
       )}

@@ -17,9 +17,9 @@ export function Button({ variant = 'primary', size = 'md', children, loading, cl
   }
 
   const sizeStyle = {
-    sm: { padding: '6px 12px', fontSize: '13px' },
-    md: { padding: '10px 20px', fontSize: '14px' },
-    lg: { padding: '14px 28px', fontSize: '16px' },
+    sm: { padding: '6px 12px', fontSize: '16px' },
+    md: { padding: '10px 20px', fontSize: '18px' },
+    lg: { padding: '14px 28px', fontSize: '20px' },
   }
 
   return (
