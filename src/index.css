@@ -229,4 +229,26 @@ input, textarea, select {
     max-height: 90vh !important;
     overflow-y: auto !important;
   }
+
+  .players-container {
+    display: flex !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    padding-bottom: 8px !important;
+  }
+  .players-container::-webkit-scrollbar {
+    display: none !important;
+  }
+  .players-container > div {
+    flex: 0 0 200px !important;
+  }
 }
+
+.players-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+

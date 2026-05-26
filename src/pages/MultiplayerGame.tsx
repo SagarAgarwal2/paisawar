@@ -440,10 +440,10 @@ export function MultiplayerGame() {
           </div>
         )}
 
-        {/* Players Scrollable Row */}
-        <div className="scroll-x" style={{ display: 'flex', gap: 12, paddingBottom: 8 }}>
+        {/* Players Responsive Grid/Scroll Row */}
+        <div className="players-container">
           {gameState.players.map((player, i) => (
-            <div key={player.id} style={{ flex: '0 0 200px' }}>
+            <div key={player.id}>
               <PlayerBoard
                 player={player}
                 isCurrent={i === gameState.currentPlayerIndex}
