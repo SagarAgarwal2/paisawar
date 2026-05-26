@@ -141,6 +141,8 @@ export function buildInitialGameState(players: RoomPlayer[]): GameState {
     pendingGains: [],
     wealthFloor: 0,
     doubleInvestActive: false,
+    investChoices: 0,
+    emiDamageTaken: false,
   }))
 
   const remaining = [...deck]
