@@ -158,6 +158,29 @@ export function Dashboard() {
 }
 
 function HomeTab({ navigate, profile, currentSeason }: { navigate: (path: string) => void; profile: ReturnType<typeof useAuth>['profile']; currentSeason: typeof SEASONS[0] }) {
+  const [seasonTimeLeft, setSeasonTimeLeft] = useState('Calculating...')
+
+  useEffect(() => {
+    const end = new Date()
+    end.setDate(end.getDate() + 12)
+    end.setHours(end.getHours() + 4)
+    const endTime = end.getTime()
+
+    const updateTimer = () => {
+      const diff = endTime - Date.now()
+      if (diff <= 0) {
+        setSeasonTimeLeft('Ended')
+        return
+      }
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24))
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24)
+      setSeasonTimeLeft(`${d}d ${h}h`)
+    }
+    updateTimer()
+    const interval = setInterval(updateTimer, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 900 }}>
       {/* Welcome */}
@@ -208,7 +231,7 @@ function HomeTab({ navigate, profile, currentSeason }: { navigate: (path: string
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 13, color: '#64748b', marginBottom: 4 }}>Season ends in</div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif' }}>12d 4h</div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif' }}>{seasonTimeLeft}</div>
           </div>
         </div>
       </Card>
@@ -296,7 +319,23 @@ function LeaderboardTab({ leaderboard, loading, profile, onRefresh }: { leaderbo
 
 function ContractsTab() {
   const contracts = DAILY_CONTRACTS
-  const mockProgress: Record<string, number> = { '1': 1, '2': 3 }
+  const mockProgress: Record<string, number> = {} // No progress yet for beta
+  const [resetTime, setResetTime] = useState('Calculating...')
+
+  useEffect(() => {
+    const updateTimer = () => {
+      const now = new Date()
+      const tomorrow = new Date(now)
+      tomorrow.setHours(24, 0, 0, 0)
+      const diff = tomorrow.getTime() - now.getTime()
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24)
+      const m = Math.floor((diff / 1000 / 60) % 60)
+      setResetTime(`${h}h ${m}m`)
+    }
+    updateTimer()
+    const interval = setInterval(updateTimer, 60000)
+    return () => clearInterval(interval)
+  }, [])
 
   const difficultyColors = { easy: '#10b981', medium: '#f59e0b', hard: '#ef4444' }
 
@@ -304,8 +343,16 @@ function ContractsTab() {
     <div style={{ maxWidth: 700 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>Daily Contracts</h2>
-        <div style={{ fontSize: 13, color: '#64748b' }}>Resets in <span style={{ color: '#f59e0b', fontWeight: 700 }}>11h 42m</span></div>
+        <div style={{ fontSize: 13, color: '#64748b' }}>Resets in <span style={{ color: '#f59e0b', fontWeight: 700 }}>{resetTime}</span></div>
       </div>
+
+      {Object.keys(mockProgress).length === 0 && (
+        <Card style={{ padding: 24, textAlign: 'center', marginBottom: 20, background: 'rgba(59,130,246,0.05)', borderColor: 'rgba(59,130,246,0.2)' }}>
+          <div style={{ fontSize: 24, marginBottom: 8 }}>🎮</div>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: '#60a5fa', marginBottom: 4 }}>Start Your Journey</h3>
+          <p style={{ fontSize: 14, color: '#94a3b8' }}>Play a game to start earning contract progress and unlock rewards!</p>
+        </Card>
+      )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {contracts.map(contract => {
@@ -382,13 +429,6 @@ function ProfileTab({ profile }: { profile: ReturnType<typeof useAuth>['profile'
               <div style={{ fontSize: 18, fontWeight: 700, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>{stat.value}</div>
             </div>
           ))}
-        </div>
-      </Card>
-
-      <Card style={{ padding: 20 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', marginBottom: 16, fontFamily: 'Space Grotesk, sans-serif' }}>Rank History</h3>
-        <div style={{ fontSize: 14, color: '#64748b', textAlign: 'center', padding: '20px 0' }}>
-          Play more ranked games to see your rank progression here.
         </div>
       </Card>
     </div>

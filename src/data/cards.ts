@@ -26,7 +26,7 @@ export const DECISION_CARDS: GameCard[] = [
     options: [
       { type: 'spend', label: 'Upgrade Lifestyle', description: 'New car, new apartment', effect: { type: 'wealth_change', value: -75000, target: 'self' } },
       { type: 'save', label: 'Emergency Fund', description: 'Build a safety net', effect: { type: 'wealth_change', value: 200000, target: 'self' } },
-      { type: 'invest', label: 'Stock Market', description: 'High risk, high reward', effect: { type: 'wealth_change', value: 400000, target: 'self' } },
+      { type: 'invest', label: 'Stock Market', description: 'High risk, high reward', effect: { type: 'wealth_change', value: 400000, target: 'self' }, investRisk: 30, failEffect: { type: 'wealth_change', value: -200000, target: 'self' } },
     ],
   },
   {
@@ -38,7 +38,7 @@ export const DECISION_CARDS: GameCard[] = [
     options: [
       { type: 'spend', label: 'Treat Yourself', description: 'You earned it', effect: { type: 'wealth_change', value: -25000, target: 'self' } },
       { type: 'save', label: 'Bank It', description: 'Safe and steady', effect: { type: 'wealth_change', value: 200000, target: 'self' } },
-      { type: 'invest', label: 'Angel Invest', description: 'Back a startup', effect: { type: 'wealth_change', value: 450000, target: 'self' } },
+      { type: 'invest', label: 'Angel Invest', description: 'Back a startup', effect: { type: 'wealth_change', value: 450000, target: 'self' }, investRisk: 25, failEffect: { type: 'wealth_change', value: -100000, target: 'self' } },
     ],
   },
   {
@@ -62,7 +62,7 @@ export const DECISION_CARDS: GameCard[] = [
     options: [
       { type: 'spend', label: 'Bootstrap Now', description: 'All in, right now', effect: { type: 'wealth_change', value: -150000, target: 'self' } },
       { type: 'save', label: 'Research First', description: 'Slow and safe', effect: { type: 'wealth_change', value: 250000, target: 'self' } },
-      { type: 'invest', label: 'Seek VC Funding', description: 'Scale or fail', effect: { type: 'wealth_change', value: 700000, target: 'self' } },
+      { type: 'invest', label: 'Seek VC Funding', description: 'Scale or fail', effect: { type: 'wealth_change', value: 700000, target: 'self' }, investRisk: 35, failEffect: { type: 'wealth_change', value: -300000, target: 'self' } },
     ],
   },
   {
@@ -74,7 +74,7 @@ export const DECISION_CARDS: GameCard[] = [
     options: [
       { type: 'spend', label: 'Skip It', description: 'IPOs are risky', effect: { type: 'wealth_change', value: 0, target: 'self' } },
       { type: 'save', label: 'Apply Minimum', description: 'Small safe bet', effect: { type: 'wealth_change', value: 200000, target: 'self' } },
-      { type: 'invest', label: 'Go All In', description: 'Maximum application', effect: { type: 'wealth_change', value: 600000, target: 'self' } },
+      { type: 'invest', label: 'Go All In', description: 'Maximum application', effect: { type: 'wealth_change', value: 600000, target: 'self' }, investRisk: 25, failEffect: { type: 'wealth_change', value: -200000, target: 'self' } },
     ],
   },
   {
@@ -86,7 +86,7 @@ export const DECISION_CARDS: GameCard[] = [
     options: [
       { type: 'spend', label: 'FOMO In', description: 'Buy the hype', effect: { type: 'wealth_change', value: -100000, target: 'self' } },
       { type: 'save', label: 'Research First', description: 'Due diligence', effect: { type: 'wealth_change', value: 100000, target: 'self' } },
-      { type: 'invest', label: 'Small Position', description: 'Only what you can lose', effect: { type: 'wealth_change', value: 500000, target: 'self' } },
+      { type: 'invest', label: 'Small Position', description: 'Only what you can lose', effect: { type: 'wealth_change', value: 500000, target: 'self' }, investRisk: 35, failEffect: { type: 'wealth_change', value: -150000, target: 'self' } },
     ],
   },
   {
@@ -122,7 +122,7 @@ export const DECISION_CARDS: GameCard[] = [
     options: [
       { type: 'spend', label: 'Stay Corporate', description: 'Stable income', effect: { type: 'wealth_change', value: 200000, target: 'self' } },
       { type: 'save', label: 'Consult Part-time', description: 'Best of both worlds', effect: { type: 'wealth_change', value: 350000, target: 'self' } },
-      { type: 'invest', label: 'Go Full Startup', description: 'Swing for the fences', effect: { type: 'wealth_change', value: 800000, target: 'self' } },
+      { type: 'invest', label: 'Go Full Startup', description: 'Swing for the fences', effect: { type: 'wealth_change', value: 800000, target: 'self' }, investRisk: 40, failEffect: { type: 'wealth_change', value: -400000, target: 'self' } },
     ],
   },
   {
@@ -134,7 +134,7 @@ export const DECISION_CARDS: GameCard[] = [
     options: [
       { type: 'spend', label: 'Sell Now', description: 'Cash in hand', effect: { type: 'wealth_change', value: 300000, target: 'self' } },
       { type: 'save', label: 'Hold the Gold', description: 'Inflation hedge', effect: { type: 'wealth_next_turn', value: 375000, target: 'self' } },
-      { type: 'invest', label: 'Buy More Gold', description: 'Double down', effect: { type: 'wealth_change', value: 550000, target: 'self' } },
+      { type: 'invest', label: 'Buy More Gold', description: 'Double down', effect: { type: 'wealth_change', value: 550000, target: 'self' }, investRisk: 20, failEffect: { type: 'wealth_change', value: -100000, target: 'self' } },
     ],
   },
   {
@@ -341,9 +341,9 @@ export const LEGENDARY_CARDS: GameCard[] = [
     tier: 'legendary',
     flavor: 'Compound interest: the 8th wonder of the world.',
     options: [
-      { type: 'spend', label: 'Cash Out', description: 'Take profits now', effect: { type: 'wealth_change', value: 500000, target: 'self' } },
-      { type: 'save', label: 'Reinvest 50%', description: 'Balanced approach', effect: { type: 'wealth_change', value: 750000, target: 'self' } },
-      { type: 'invest', label: 'Full Compounding', description: 'Let it ride', effect: { type: 'wealth_change', value: 1200000, target: 'self' } },
+      { type: 'spend', label: 'Cash Out', description: 'Take profits now', effect: { type: 'wealth_change', value: 400000, target: 'self' } },
+      { type: 'save', label: 'Reinvest 50%', description: 'Balanced approach', effect: { type: 'wealth_change', value: 650000, target: 'self' } },
+      { type: 'invest', label: 'Full Compounding', description: 'Let it ride', effect: { type: 'wealth_change', value: 1000000, target: 'self' }, investRisk: 45, failEffect: { type: 'wealth_change', value: -400000, target: 'self' } },
     ],
   },
   {

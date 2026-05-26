@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import type { Profile } from '../types/database'
+import { calculateRPChange } from './gameEngine'
 
 export async function signUp(email: string, password: string, username: string): Promise<void> {
   const { data, error } = await supabase.auth.signUp({ email, password })
@@ -45,7 +46,15 @@ export async function updateProfile(userId: string, updates: Partial<Profile>): 
   if (error) throw error
 }
 
-export async function saveGameResult(userId: string, username: string, won: boolean, finalWealth: number): Promise<void> {
+export async function saveGameResult(
+  userId: string,
+  username: string,
+  won: boolean,
+  finalWealth: number,
+  placement: number = 1,
+  totalPlayers: number = 2,
+  winStreak: number = 0
+): Promise<void> {
   // Upsert leaderboard entry
   const { data: existing } = await supabase
     .from('leaderboard')
@@ -86,7 +95,8 @@ export async function saveGameResult(userId: string, username: string, won: bool
 
   if (profile) {
     const newStreak = won ? profile.win_streak + 1 : 0
-    const rpGain = won ? 30 : -15
+    // Use the proper placement-based RP formula
+    const rpGain = calculateRPChange(placement, totalPlayers, winStreak)
     await supabase
       .from('profiles')
       .update({

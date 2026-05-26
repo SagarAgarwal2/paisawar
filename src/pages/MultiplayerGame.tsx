@@ -66,7 +66,10 @@ export function MultiplayerGame() {
     resultSavedRef.current = true
     const isWinner = state.winner?.id === p.id
     const myWealth = state.players.find(pl => pl.id === p.id)?.wealth ?? 0
-    await saveGameResult(p.id, p.username, isWinner, myWealth)
+    const placement = [...state.players]
+      .sort((a, b) => b.wealth - a.wealth)
+      .findIndex(pl => pl.id === p.id) + 1
+    await saveGameResult(p.id, p.username, isWinner, myWealth, placement, state.players.length, p.win_streak ?? 0)
     await refreshProfile()
   }
 
@@ -152,26 +155,7 @@ export function MultiplayerGame() {
         }
       })
 
-    // Fallback polling every 3s just in case realtime is disabled/dropped
-    const pollId = setInterval(async () => {
-      const { data } = await supabase
-        .from('multiplayer_rooms')
-        .select('game_state')
-        .eq('id', roomId)
-        .maybeSingle()
-      
-      if (data?.game_state) {
-        const remoteState = data.game_state as GameState
-        if (shouldApplyRemoteState(remoteState)) {
-           applyRemoteState(remoteState)
-        }
-      }
-    }, 3000)
-
-    return () => { 
-      channel.unsubscribe()
-      clearInterval(pollId) 
-    }
+    return () => { channel.unsubscribe() }
   }, [roomId, shouldApplyRemoteState]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTimeout = useCallback(async () => {

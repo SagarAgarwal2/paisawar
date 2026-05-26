@@ -1,5 +1,6 @@
 import type { GameState, PlayerState, GameCard, CardEffect, DecisionChoice } from '../types/game'
 import { createGameDeck } from '../data/cards'
+import { SEASONS } from '../data/mockData'
 
 const STARTING_WEALTH = 500000   // ₹5 Lakhs
 const WEALTH_GOAL = 5000000      // ₹50 Lakhs
@@ -132,11 +133,13 @@ function applyEffect(state: GameState, effect: CardEffect, sourcePlayerIndex: nu
       break
     }
     case 'attack_all_pct': {
-      const pct = (effect.value ?? 0) / 100
+      // Scale AoE damage down with more players to prevent runaway dominance
+      const rawPct = (effect.value ?? 0) / 100
+      const scaleFactor = players.length <= 2 ? 1.0 : players.length === 3 ? 0.8 : 0.65
+      const scaledPct = rawPct * scaleFactor
       players = players.map((p, i) => {
-        // 'others' skips source; 'all' hits everyone (source too — rare/fair)
         if (effect.target === 'others' && i === sourcePlayerIndex) return p
-        const loss = Math.floor(p.wealth * pct)
+        const loss = Math.floor(p.wealth * scaledPct)
         return { ...p, wealth: clampWealth(p.wealth - loss, p.wealthFloor) }
       })
       break
@@ -168,8 +171,35 @@ export function processDecision(state: GameState, playerIndex: number, choice: D
   const option = card.options?.find(o => o.type === choice)
   if (!option) return state
 
+  // --- Invest Risk mechanic ---
+  // If the chosen option has a risk chance, roll the dice.
+  // On failure, apply the failEffect instead (e.g., loss).
+  let effectToApply = option.effect
+  let riskFired = false
+  if (choice === 'invest' && option.investRisk && option.failEffect) {
+    if (Math.random() * 100 < option.investRisk) {
+      effectToApply = option.failEffect
+      riskFired = true
+    }
+  }
+
+  // --- Season multiplier ---
+  // If the active season boosts invest gains, apply it when the invest SUCCEEDS
+  const activeSeason = SEASONS.find(s => s.is_active)
+  let seasonBoost = 1.0
+  if (!riskFired && choice === 'invest' && activeSeason?.special_rule?.includes('INVEST gains')) {
+    const match = activeSeason.special_rule.match(/(\d+)%/)
+    if (match) seasonBoost = 1 + parseInt(match[1]) / 100 // e.g. +40% → 1.4
+  }
+
+  // Apply season boost by temporarily scaling the effect value
+  let scaledEffect = effectToApply
+  if (seasonBoost !== 1.0 && effectToApply.value && effectToApply.value > 0) {
+    scaledEffect = { ...effectToApply, value: Math.floor(effectToApply.value * seasonBoost) }
+  }
+
   // applyEffect handles doubleInvestActive bonus internally
-  let newState = applyEffect(state, option.effect, playerIndex, playerIndex)
+  let newState = applyEffect(state, scaledEffect, playerIndex, playerIndex)
   // Clear doubleInvestActive after use
   const players = newState.players.map((p, i) =>
     i === playerIndex ? { ...p, doubleInvestActive: false } : p
@@ -182,7 +212,10 @@ export function processDecision(state: GameState, playerIndex: number, choice: D
     i === playerIndex ? { ...p, hand } : p
   )
 
-  const logEntry = `${state.players[playerIndex].name} played ${card.name} → ${choice.toUpperCase()}`
+  let logEntry = `${state.players[playerIndex].name} played ${card.name} → ${choice.toUpperCase()}`
+  if (riskFired) logEntry += ' 📉 (Investment Failed!)'
+  if (seasonBoost !== 1.0 && !riskFired) logEntry += ' ⚡ (Season Boost!)'
+
   return checkWinCondition({
     ...newState,
     players: updatedPlayers,
@@ -319,28 +352,54 @@ export function doBotTurn(state: GameState): { state: GameState; delay: number }
     return { state: advanceTurn(drawnState), delay: 800 }
   }
 
-  // Prefer: targeted action > decision (always invest) > AoE action > discard
-  const targetedAction = hand.find(c => c.type === 'action' && c.effect?.target === 'target')
-  const aoeAction = hand.find(c => c.type === 'action' && (c.effect?.target === 'others'))
-  const decision = hand.find(c => c.type === 'decision')
+  // --- Improved Bot AI ---
+  // Priority: targeted action > decision > AoE action > defense discard > discard
+  // Randomize to be less predictable
+  const rand = Math.random()
 
-  // Pick the player with most wealth to attack
-  const richestOtherIndex = drawnState.players
+  const targetedAction = hand.find(c => c.type === 'action' && c.effect?.target === 'target')
+  const aoeAction = hand.find(c => c.type === 'action' && c.effect?.target === 'others')
+  const decision = hand.find(c => c.type === 'decision')
+  const defenseCard = hand.find(c => c.type === 'defense')
+
+  // Attack the player closest to winning (most dangerous), not just richest
+  const mostDangerousOtherIndex = drawnState.players
     .map((p, i) => ({ wealth: p.wealth, i }))
     .filter(x => x.i !== botIndex)
     .sort((a, b) => b.wealth - a.wealth)[0]?.i ?? ((botIndex + 1) % drawnState.players.length)
 
   let finalState: GameState
 
-  if (targetedAction && Math.random() > 0.35) {
-    finalState = processAction(drawnState, botIndex, targetedAction, richestOtherIndex)
+  if (targetedAction && rand > 0.25) {
+    // 75% chance to use a targeted attack when available
+    finalState = processAction(drawnState, botIndex, targetedAction, mostDangerousOtherIndex)
   } else if (decision) {
-    const choice: DecisionChoice = bot.wealth < STARTING_WEALTH * 0.6 ? 'save' : 'invest'
+    // Bot makes a smarter choice based on wealth position
+    const wealthRatio = bot.wealth / STARTING_WEALTH
+    let choice: DecisionChoice
+    if (wealthRatio < 0.5) {
+      // Low on funds: always save (bot is risk-averse when losing)
+      choice = 'save'
+    } else if (wealthRatio > 2.0 && rand > 0.3) {
+      // Doing well: invest with 70% probability, otherwise save
+      choice = rand > 0.3 ? 'invest' : 'save'
+    } else {
+      // Middle ground: 50/50 invest vs save
+      choice = rand > 0.5 ? 'invest' : 'save'
+    }
     finalState = processDecision(drawnState, botIndex, choice, decision)
-  } else if (aoeAction) {
+  } else if (aoeAction && rand > 0.4) {
     finalState = processAction(drawnState, botIndex, aoeAction, botIndex)
+  } else if (defenseCard && rand > 0.6) {
+    // Occasionally proactively discard a defense card to free hand space
+    const discard = [...drawnState.discardPile, defenseCard]
+    const updatedHand = hand.filter(c => c.id !== defenseCard.id)
+    const updatedPlayers = drawnState.players.map((p, i) =>
+      i === botIndex ? { ...p, hand: updatedHand } : p,
+    )
+    finalState = { ...drawnState, players: updatedPlayers, discardPile: discard }
   } else {
-    // Discard the first non-defense card, or whatever is first
+    // Discard the first non-defense card, or first card
     const toDiscard = hand.find(c => c.type !== 'defense') ?? hand[0]
     const discard = [...drawnState.discardPile, toDiscard]
     const updatedHand = hand.filter(c => c.id !== toDiscard.id)

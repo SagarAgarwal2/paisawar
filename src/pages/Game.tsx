@@ -59,11 +59,15 @@ export function Game() {
     if (profile?.id && profile?.username) {
       const humanPlayer = finalState.players[humanPlayerIndex]
       const isWinner = finalState.winner?.id === humanPlayer.id
+      const placement = [...finalState.players]
+        .sort((a, b) => b.wealth - a.wealth)
+        .findIndex(p => p.id === humanPlayer.id) + 1
       if (isWinner) playSound('win')
       else playSound('lose')
-      saveGameResult(profile.id, profile.username, isWinner, humanPlayer.wealth).then(() => {
-        refreshProfile()
-      })
+      saveGameResult(
+        profile.id, profile.username, isWinner, humanPlayer.wealth,
+        placement, finalState.players.length, profile.win_streak ?? 0
+      ).then(() => { refreshProfile() })
     }
   }, [profile, humanPlayerIndex, refreshProfile])
 
@@ -197,10 +201,13 @@ export function Game() {
   if (uiPhase === 'result' && gameState) {
     const humanPlayer = gameState.players[humanPlayerIndex]
     const isWinner = gameState.winner?.id === humanPlayer.id
-    const placement = gameState.players
+    const placement = [...gameState.players]
       .sort((a, b) => b.wealth - a.wealth)
       .findIndex(p => p.id === humanPlayer.id) + 1
     const rpChange = mode === 'ranked' ? calculateRPChange(placement, gameState.players.length, profile?.win_streak ?? 0) : 0
+    // Near-miss: player was within 20% of the goal but didn't win
+    const wealthGap = gameState.wealthGoal - humanPlayer.wealth
+    const nearMiss = !isWinner && wealthGap > 0 && wealthGap < gameState.wealthGoal * 0.2
 
     return (
       <ResultScreen
@@ -208,6 +215,8 @@ export function Game() {
         placement={placement}
         finalWealth={humanPlayer.wealth}
         rpChange={rpChange}
+        nearMiss={nearMiss}
+        wealthGap={wealthGap}
         players={gameState.players}
         mode={mode}
         onPlayAgain={() => { setGameState(null); setUiPhase('setup') }}
@@ -476,7 +485,7 @@ function SetupScreen({ mode, botCount, setBotCount, onStart, onBack }: { mode: s
   )
 }
 
-function ResultScreen({ isWinner, placement, finalWealth, rpChange, players, mode, onPlayAgain, onDashboard }: { isWinner: boolean; placement: number; finalWealth: number; rpChange: number; players: PlayerState[]; mode: string; onPlayAgain: () => void; onDashboard: () => void }) {
+function ResultScreen({ isWinner, placement, finalWealth, rpChange, players, mode, onPlayAgain, onDashboard, nearMiss, wealthGap }: { isWinner: boolean; placement: number; finalWealth: number; rpChange: number; players: PlayerState[]; mode: string; onPlayAgain: () => void; onDashboard: () => void; nearMiss?: boolean; wealthGap?: number }) {
   const sorted = [...players].sort((a, b) => b.wealth - a.wealth)
 
   return (
@@ -486,9 +495,14 @@ function ResultScreen({ isWinner, placement, finalWealth, rpChange, players, mod
         <div style={{ fontSize: 64, marginBottom: 16 }}>
           {isWinner ? '🏆' : placement === 2 ? '🥈' : placement === 3 ? '🥉' : '💪'}
         </div>
-        <h1 style={{ fontSize: 32, fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif', color: isWinner ? '#f59e0b' : '#f1f5f9', marginBottom: 8 }}>
-          {isWinner ? 'Victory!' : `${placement === 2 ? '2nd' : placement === 3 ? '3rd' : `${placement}th`} Place`}
+        <h1 style={{ fontSize: 32, fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif', color: isWinner ? '#f59e0b' : nearMiss ? '#f97316' : '#f1f5f9', marginBottom: 8 }}>
+          {isWinner ? 'Victory!' : nearMiss ? 'So Close! 😤' : `${placement === 2 ? '2nd' : placement === 3 ? '3rd' : `${placement}th`} Place`}
         </h1>
+        {nearMiss && wealthGap !== undefined && (
+          <p style={{ color: '#f97316', fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
+            You were just {formatWealth(wealthGap)} away from winning!
+          </p>
+        )}
         <p style={{ color: '#94a3b8', marginBottom: 28, fontSize: 16 }}>Final wealth: {formatWealth(finalWealth)}</p>
 
         {mode === 'ranked' && (

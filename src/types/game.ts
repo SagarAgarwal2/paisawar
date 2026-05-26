@@ -15,6 +15,10 @@ export interface DecisionOption {
   label: string
   description: string
   effect: CardEffect
+  /** 0-100: percentage chance that an INVEST choice will FAIL and apply failEffect instead */
+  investRisk?: number
+  /** Applied when investRisk triggers (e.g. -₹200K loss) */
+  failEffect?: CardEffect
 }
 
 export interface GameCard {
