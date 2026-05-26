@@ -23,7 +23,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({ user: null, profile: null, loading: true })
 
   const loadProfile = useCallback(async (user: User) => {
-    const profile = await getProfile(user.id)
+    let profile = await getProfile(user.id)
+    
+    // Auto-create missing profile (e.g. if signup failed halfway or email confirmations were required)
+    if (!profile) {
+      try {
+        const baseName = user.email?.split('@')[0] || 'player'
+        const username = `${baseName}${Math.floor(Math.random() * 10000)}`
+        
+        await supabase.from('profiles').insert({ id: user.id, username })
+        await supabase.from('leaderboard').insert({ user_id: user.id, username })
+        
+        profile = await getProfile(user.id)
+      } catch (e) {
+        console.error('Failed to auto-create missing profile', e)
+      }
+    }
+    
     setState(s => ({ ...s, user, profile, loading: false }))
   }, [])
 
