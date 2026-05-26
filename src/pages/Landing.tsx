@@ -19,7 +19,7 @@ const PREVIEW_CARDS = [
 
 export function Landing() {
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0e1a', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', overflowX: 'hidden' }}>
       {/* Navbar */}
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0,
@@ -51,16 +51,7 @@ export function Landing() {
         position: 'relative',
         overflow: 'hidden',
       }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse 80% 60% at 50% 20%, rgba(37,99,235,0.12) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }} />
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse 60% 40% at 80% 80%, rgba(245,158,11,0.08) 0%, transparent 60%)',
-          pointerEvents: 'none',
-        }} />
+        {/* Background is now handled globally in index.css */}
 
         <div style={{ animation: 'fadeIn 0.6s ease forwards', position: 'relative' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '6px 16px', borderRadius: 999, border: '1px solid rgba(245,158,11,0.3)', background: 'rgba(245,158,11,0.08)', marginBottom: 24 }}>
@@ -116,7 +107,7 @@ export function Landing() {
       </section>
 
       {/* Stats Bar */}
-      <section style={{ padding: '32px 24px', background: '#0f1524', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <section className="glass-panel" style={{ padding: '32px 24px', borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, textAlign: 'center' }}>
           {[
             { label: 'Cards', value: '108' },
@@ -138,12 +129,11 @@ export function Landing() {
         <p style={{ textAlign: 'center', color: '#64748b', marginBottom: 56 }}>Everything you love about competitive card games, built around Indian financial life.</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
           {FEATURE_CARDS.map(f => (
-            <div key={f.title} style={{
-              background: '#1a2235', border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 16, padding: '24px',
-              transition: 'all 0.2s',
+            <div key={f.title} className="glass-panel" style={{
+              padding: '28px', borderRadius: '24px',
+              transition: 'all 0.3s ease',
             }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.16)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.2)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)' }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.08)'; (e.currentTarget as HTMLDivElement).style.transform = 'none' }}
             >
               <div style={{ fontSize: 32, marginBottom: 12 }}>{f.icon}</div>
@@ -155,7 +145,7 @@ export function Landing() {
       </section>
 
       {/* CTA */}
-      <section style={{ padding: '80px 24px', textAlign: 'center', background: 'linear-gradient(135deg, rgba(37,99,235,0.08), rgba(245,158,11,0.08))' }}>
+      <section className="glass-panel" style={{ padding: '80px 24px', textAlign: 'center', borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}>
         <h2 style={{ fontSize: 40, fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, color: '#f1f5f9', marginBottom: 16 }}>Ready to build your empire?</h2>
         <p style={{ color: '#94a3b8', fontSize: 18, marginBottom: 40 }}>Join thousands of players racing to ₹50 Lakhs.</p>
         <Link to="/auth?mode=register">

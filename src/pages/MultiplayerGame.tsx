@@ -379,14 +379,13 @@ export function MultiplayerGame() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0e1a', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{
+      <div className="glass-panel" style={{
         position: 'sticky', top: 0, zIndex: 40,
-        background: 'rgba(10,14,26,0.96)', backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        padding: '0 20px', height: 56,
+        padding: '0 20px', height: 60,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        borderRadius: 0, borderTop: 'none', borderLeft: 'none', borderRight: 'none',
       }}>
         <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: 16, color: '#f59e0b' }}>
           PAISA WAR
@@ -433,9 +432,8 @@ export function MultiplayerGame() {
         <GameLog log={gameState.log} />
 
         {/* Action panel */}
-        <div style={{
-          background: '#131b2e', border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 16, padding: '24px', minHeight: 200,
+        <div className="glass-panel" style={{
+          borderRadius: 16, padding: '24px', minHeight: 200, boxShadow: 'none'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <h2 style={{ margin: 0, fontSize: 18, color: '#f1f5f9', fontWeight: 700 }}>

@@ -44,12 +44,14 @@ export function PlayerBoard({ player, isCurrent, isMe, isTarget, isOffline, weal
       whileHover={isTarget ? { scale: 1.02, backgroundColor: 'rgba(239,68,68,0.08)' } : {}}
       whileTap={isTarget ? { scale: 0.95 } : {}}
       onClick={isTarget ? onClick : undefined}
+      className="glass-panel"
       style={{
-        background: isCurrent ? 'rgba(37,99,235,0.1)' : '#131b2e',
-        border: `2px solid ${isCurrent ? '#2563eb' : isTarget ? 'rgba(239,68,68,0.7)' : 'rgba(255,255,255,0.07)'}`,
-        borderRadius: 12, padding: '14px 15px',
+        background: isCurrent ? 'rgba(59,130,246,0.1)' : undefined,
+        border: `1px solid ${isCurrent ? 'rgba(59,130,246,0.5)' : isTarget ? 'rgba(239,68,68,0.7)' : 'rgba(255,255,255,0.08)'}`,
+        borderRadius: 16, padding: '16px',
         cursor: isTarget ? 'pointer' : 'default',
         position: 'relative',
+        boxShadow: isCurrent ? '0 0 20px rgba(59,130,246,0.2)' : undefined,
       }}
     >
       <AnimatePresence>
@@ -75,21 +77,21 @@ export function PlayerBoard({ player, isCurrent, isMe, isTarget, isOffline, weal
       </AnimatePresence>
 
       {isCurrent && !isOffline && (
-        <div style={{
-          position: 'absolute', top: -9, right: 10,
-          fontSize: 10, fontWeight: 800, color: '#60a5fa',
-          background: '#0a0e1a', padding: '2px 8px', borderRadius: 4,
-          border: '1px solid #2563eb', letterSpacing: '0.05em',
+        <div className="glass-pill" style={{
+          position: 'absolute', top: -12, right: 10,
+          fontSize: 9, fontWeight: 700, color: '#60a5fa',
+          padding: '4px 10px',
+          letterSpacing: '0.1em',
         }}>
           PLAYING
         </div>
       )}
       {isOffline && (
-        <div style={{
-          position: 'absolute', top: -9, right: 10,
-          fontSize: 10, fontWeight: 800, color: '#94a3b8',
-          background: '#0a0e1a', padding: '2px 8px', borderRadius: 4,
-          border: '1px solid #475569', letterSpacing: '0.05em',
+        <div className="glass-pill" style={{
+          position: 'absolute', top: -12, right: 10,
+          fontSize: 9, fontWeight: 700, color: '#94a3b8',
+          padding: '4px 10px',
+          letterSpacing: '0.1em',
         }}>
           OFFLINE
         </div>

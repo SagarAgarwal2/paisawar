@@ -11,9 +11,9 @@ interface GameCardProps {
 }
 
 const TYPE_COLORS = {
-  decision: { bg: '#0a2a1a', border: '#059669', label: '#34d399', badge: '#059669' },
-  action: { bg: '#2a0a0a', border: '#dc2626', label: '#f87171', badge: '#dc2626' },
-  defense: { bg: '#0a1a2a', border: '#2563eb', label: '#60a5fa', badge: '#2563eb' },
+  decision: { bg: 'rgba(16, 185, 129, 0.1)', border: 'rgba(16, 185, 129, 0.4)', label: '#34d399', badge: '#059669' },
+  action: { bg: 'rgba(239, 68, 68, 0.1)', border: 'rgba(239, 68, 68, 0.4)', label: '#f87171', badge: '#dc2626' },
+  defense: { bg: 'rgba(59, 130, 246, 0.1)', border: 'rgba(59, 130, 246, 0.4)', label: '#60a5fa', badge: '#2563eb' },
 }
 
 const TIER_BADGE: Record<string, string> = {
@@ -33,12 +33,11 @@ export function GameCard({ card, onClick, selected, disabled, compact, faceDown 
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
+        className="glass-card"
         style={{
           width: compact ? 64 : 120,
           height: compact ? 90 : 168,
-          background: 'linear-gradient(135deg, #1a2235 0%, #0f1524 100%)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: compact ? 8 : 12,
+          borderRadius: compact ? 12 : 16,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -64,24 +63,26 @@ export function GameCard({ card, onClick, selected, disabled, compact, faceDown 
       whileHover={onClick && !disabled && !selected ? { y: -8, scale: 1.05, rotateY: 10, rotateX: -5, boxShadow: `0 12px 30px ${colors.border}66` } : {}}
       whileTap={onClick && !disabled ? { scale: 0.95 } : {}}
       onClick={!disabled ? onClick : undefined}
+      className="glass-card"
       style={{
         width: compact ? 80 : 140,
         height: compact ? 110 : 200,
         background: isLegendary
-          ? 'linear-gradient(135deg, #1a1200, #2a1a00)'
-          : `linear-gradient(135deg, ${colors.bg}, #0f1524)`,
-        border: `2px solid ${selected ? '#f59e0b' : isLegendary ? '#d97706' : colors.border}`,
-        borderRadius: compact ? 8 : 12,
+          ? 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(0,0,0,0.5))'
+          : `linear-gradient(135deg, ${colors.bg}, rgba(0,0,0,0.2))`,
+        border: `1px solid ${selected ? '#f59e0b' : isLegendary ? 'rgba(245,158,11,0.6)' : colors.border}`,
+        borderTop: `1px solid ${selected ? '#f59e0b' : isLegendary ? 'rgba(245,158,11,0.8)' : 'rgba(255,255,255,0.2)'}`,
+        borderRadius: compact ? 12 : 16,
         cursor: onClick && !disabled ? 'pointer' : 'default',
-        padding: compact ? '6px' : '10px',
+        padding: compact ? '8px' : '12px',
         display: 'flex',
         flexDirection: 'column',
         gap: compact ? 4 : 6,
         boxShadow: selected
-          ? '0 8px 24px rgba(245,158,11,0.4)'
+          ? '0 8px 32px rgba(245,158,11,0.4)'
           : isLegendary
-          ? '0 0 20px rgba(217,119,6,0.3)'
-          : 'none',
+          ? '0 0 24px rgba(217,119,6,0.3)'
+          : '0 4px 16px rgba(0,0,0,0.3)',
         flexShrink: 0,
         position: 'relative',
         overflow: 'hidden',
@@ -99,13 +100,11 @@ export function GameCard({ card, onClick, selected, disabled, compact, faceDown 
         <span style={{ fontSize: compact ? 10 : 11, color: colors.label, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
           {TYPE_ICONS[card.type]} {compact ? '' : card.type}
         </span>
-        <span style={{
+        <span className="glass-pill" style={{
           fontSize: 9,
           fontWeight: 700,
-          padding: '1px 4px',
-          borderRadius: 4,
-          background: TIER_BADGE[card.tier] ?? '#64748b',
-          color: '#fff',
+          padding: '2px 6px',
+          color: TIER_BADGE[card.tier] ?? '#64748b',
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
         }}>

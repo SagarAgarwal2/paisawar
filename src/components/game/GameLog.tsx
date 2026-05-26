@@ -4,9 +4,8 @@ interface GameLogProps {
 
 export function GameLog({ log }: GameLogProps) {
   return (
-    <div style={{
-      background: '#0c1220', border: '1px solid rgba(255,255,255,0.05)',
-      borderRadius: 8, padding: '8px 14px', maxHeight: 80, overflowY: 'auto',
+    <div className="glass-panel" style={{
+      borderRadius: 12, padding: '12px 16px', maxHeight: 90, overflowY: 'auto', boxShadow: 'none'
     }}>
       {log.slice(0, 5).map((entry, i) => (
         <div key={i} style={{

@@ -204,14 +204,13 @@ export function Game() {
   const secondsLeft = Math.floor((remaining % 60000) / 1000)
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0e1a', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Game Header */}
-      <div style={{
+      <div className="glass-panel" style={{
         position: 'sticky', top: 0, zIndex: 40,
-        background: 'rgba(10,14,26,0.95)', backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        padding: '0 20px', height: 56,
+        padding: '0 20px', height: 60,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        borderRadius: 0, borderTop: 'none', borderLeft: 'none', borderRight: 'none',
       }}>
         <button onClick={() => navigate('/dashboard')} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}>
           ← Dashboard
@@ -223,7 +222,7 @@ export function Game() {
           <div style={{ fontSize: 13, color: minutesLeft < 5 ? '#ef4444' : '#64748b', fontWeight: minutesLeft < 5 ? 700 : 400 }}>
             ⏱ {minutesLeft}:{secondsLeft.toString().padStart(2, '0')}
           </div>
-          <div style={{ padding: '4px 12px', borderRadius: 6, background: mode === 'ranked' ? 'rgba(37,99,235,0.2)' : 'rgba(16,185,129,0.15)', color: mode === 'ranked' ? '#60a5fa' : '#34d399', fontSize: 12, fontWeight: 700, textTransform: 'uppercase' }}>
+          <div style={{ padding: '4px 12px', borderRadius: 6, background: mode === 'ranked' ? 'rgba(37,99,235,0.2)' : 'rgba(10,185,129,0.15)', color: mode === 'ranked' ? '#60a5fa' : '#34d399', fontSize: 12, fontWeight: 700, textTransform: 'uppercase' }}>
             {mode}
           </div>
         </div>
@@ -423,21 +422,35 @@ function SetupScreen({ mode, botCount, setBotCount, onStart, onBack }: { mode: s
                   cursor: 'pointer', transition: 'all 0.15s', fontFamily: 'inherit',
                 }}
               >
-                {n}
+                <div className="glass-pill" style={{
+                  padding: '8px 12px',
+                  borderRadius: 12,
+                  fontSize: 13,
+                  color: botCount === n ? '#60a5fa' : '#94a3b8',
+                  lineHeight: 1.4,
+                }}>
+                  {n}
+                </div>
               </button>
             ))}
           </div>
           <p style={{ fontSize: 12, color: '#64748b', marginTop: 10 }}>Playing against {botCount} AI opponent{botCount > 1 ? 's' : ''} ({botCount + 1} players total)</p>
         </div>
 
-        <div style={{ background: '#1a2235', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 16px', marginBottom: 24, fontSize: 13, color: '#64748b' }}>
+        <aside className="glass-panel" style={{
+          width: 320, flexShrink: 0,
+          borderLeft: '1px solid rgba(255,255,255,0.08)',
+          display: 'flex', flexDirection: 'column',
+          position: 'sticky', top: 60, height: 'calc(100vh - 60px)',
+          borderRadius: 0, borderTop: 'none', borderBottom: 'none', borderRight: 'none',
+        }}>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <div>🎯 Race to <span style={{ color: '#f59e0b', fontWeight: 700 }}>₹50 Lakhs</span></div>
             <div>⏱ <span style={{ color: '#f1f5f9', fontWeight: 600 }}>25 min</span> time limit</div>
             <div>🃏 <span style={{ color: '#f1f5f9', fontWeight: 600 }}>65+</span> card deck</div>
             {mode === 'ranked' && <div>⚡ <span style={{ color: '#60a5fa', fontWeight: 600 }}>RP at stake</span></div>}
           </div>
-        </div>
+        </aside>
 
         <Button size="lg" variant="gold" onClick={onStart} style={{ width: '100%' }}>
           Start Game

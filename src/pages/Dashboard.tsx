@@ -67,7 +67,7 @@ export function Dashboard() {
   }, 0)
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0e1a', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Top Nav */}
       <nav style={{
         position: 'sticky', top: 0, zIndex: 40,
@@ -89,13 +89,14 @@ export function Dashboard() {
 
       <div style={{ display: 'flex', flex: 1 }}>
         {/* Sidebar */}
-        <aside style={{
-          width: 200, flexShrink: 0,
-          background: '#0f1524', borderRight: '1px solid rgba(255,255,255,0.06)',
-          padding: '20px 12px',
-          display: 'flex', flexDirection: 'column', gap: 4,
+        <aside className="glass-panel" style={{
+          width: 220, flexShrink: 0,
+          borderTop: 'none', borderLeft: 'none', borderBottom: 'none',
+          padding: '24px 16px',
+          display: 'flex', flexDirection: 'column', gap: 6,
           position: 'sticky', top: 60, height: 'calc(100vh - 60px)',
           overflowY: 'auto',
+          borderRadius: 0,
         }}>
           {([
             { id: 'home', label: 'Home', icon: '🏠' },
@@ -109,7 +110,7 @@ export function Dashboard() {
               onClick={() => setTab(item.id)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 10,
-                padding: '10px 12px', borderRadius: 8, border: 'none',
+                padding: '12px 16px', borderRadius: 12, border: 'none',
                 background: tab === item.id ? 'rgba(37,99,235,0.15)' : 'transparent',
                 color: tab === item.id ? '#60a5fa' : '#64748b',
                 cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
@@ -313,12 +314,12 @@ function MarketTab({ stocks, holdings, portfolioValue, coins, onRefresh, profile
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>DAANIK Stock Market</h2>
         <div style={{ display: 'flex', gap: 12 }}>
-          <div style={{ background: '#1a2235', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '8px 16px', textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#64748b' }}>PORTFOLIO</div>
+          <div className="glass-panel" style={{ borderRadius: 12, padding: '8px 16px', textAlign: 'center', boxShadow: 'none' }}>
+            <div style={{ fontSize: 11, color: '#64748b', letterSpacing: '0.05em', fontWeight: 600 }}>PORTFOLIO</div>
             <div style={{ fontSize: 16, fontWeight: 700, color: '#10b981', fontFamily: 'Space Grotesk, sans-serif' }}>{formatWealth(portfolioValue)}</div>
           </div>
-          <div style={{ background: '#1a2235', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '8px 16px', textAlign: 'center' }}>
-            <div style={{ fontSize: 11, color: '#64748b' }}>COINS</div>
+          <div className="glass-panel" style={{ borderRadius: 12, padding: '8px 16px', textAlign: 'center', boxShadow: 'none' }}>
+            <div style={{ fontSize: 11, color: '#64748b', letterSpacing: '0.05em', fontWeight: 600 }}>COINS</div>
             <div style={{ fontSize: 16, fontWeight: 700, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif' }}>🪙 {coins}</div>
           </div>
         </div>
@@ -408,7 +409,7 @@ function ContractsTab() {
           const color = difficultyColors[contract.difficulty]
 
           return (
-            <Card key={contract.id} style={{ padding: 20, borderColor: completed ? 'rgba(16,185,129,0.3)' : contract.is_weekly ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.08)', background: completed ? 'rgba(16,185,129,0.05)' : contract.is_weekly ? 'rgba(245,158,11,0.04)' : '#1a2235' }}>
+            <Card key={contract.id} style={{ padding: 20, borderColor: completed ? 'rgba(16,185,129,0.3)' : contract.is_weekly ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.08)', background: completed ? 'rgba(16,185,129,0.05)' : contract.is_weekly ? 'rgba(245,158,11,0.04)' : undefined }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>

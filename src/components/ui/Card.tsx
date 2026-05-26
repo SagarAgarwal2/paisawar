@@ -9,7 +9,7 @@ interface CardProps {
   glow?: 'blue' | 'gold' | 'green' | 'red'
 }
 
-export function Card({ children, style, onClick, hoverable, glow }: CardProps) {
+export function Card({ children, style, className, onClick, hoverable, glow }: CardProps) {
   const glowColors = {
     blue: '0 0 20px rgba(37,99,235,0.25)',
     gold: '0 0 20px rgba(245,158,11,0.3)',
@@ -20,14 +20,13 @@ export function Card({ children, style, onClick, hoverable, glow }: CardProps) {
   return (
     <div
       onClick={onClick}
+      className={`glass-panel ${className ?? ''}`}
       style={{
-        background: '#1a2235',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: '16px',
-        padding: '20px',
+        borderRadius: '20px',
+        padding: '24px',
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'all 0.2s',
-        boxShadow: glow ? glowColors[glow] : 'none',
+        transition: 'all 0.3s ease',
+        boxShadow: glow ? glowColors[glow] : '0 8px 32px rgba(0, 0, 0, 0.2)',
         ...style,
       }}
       onMouseEnter={hoverable && onClick ? (e) => {
