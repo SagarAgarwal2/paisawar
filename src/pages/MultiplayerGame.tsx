@@ -565,20 +565,13 @@ export function MultiplayerGame() {
                   return (
                     <button
                       key={opt.type}
+                      className={opt.type}
                       onClick={() => handleDecision(opt.type)}
                       style={{
                         flex: '1 1 180px', padding: '16px 18px', borderRadius: 12,
-                        background: `${c.bg}1a`, border: `2px solid ${c.border}55`,
-                        color: '#f1f5f9', cursor: 'pointer', textAlign: 'left',
+                        cursor: 'pointer', textAlign: 'left',
                         transition: 'all 0.15s', fontFamily: 'inherit',
-                      }}
-                      onMouseEnter={e => {
-                        (e.currentTarget as HTMLButtonElement).style.background = `${c.bg}33`
-                        ;(e.currentTarget as HTMLButtonElement).style.borderColor = c.border
-                      }}
-                      onMouseLeave={e => {
-                        (e.currentTarget as HTMLButtonElement).style.background = `${c.bg}1a`
-                        ;(e.currentTarget as HTMLButtonElement).style.borderColor = `${c.border}55`
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
                       }}
                     >
                       <div style={{ fontSize: 13, fontWeight: 800, color: c.border, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>

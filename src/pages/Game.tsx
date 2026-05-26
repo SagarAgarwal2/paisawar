@@ -364,15 +364,14 @@ export function Game() {
                   return (
                     <button
                       key={opt.type}
+                      className={opt.type}
                       onClick={() => handleDecision(opt.type)}
                       style={{
                         flex: '1 1 200px', padding: '16px 20px', borderRadius: 12,
-                        background: `${c.bg}22`, border: `2px solid ${c.border}44`,
-                        color: '#f1f5f9', cursor: 'pointer', textAlign: 'left',
+                        cursor: 'pointer', textAlign: 'left',
                         transition: 'all 0.2s', fontFamily: 'inherit',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
                       }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = `${c.bg}44`; (e.currentTarget as HTMLButtonElement).style.borderColor = c.border }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = `${c.bg}22`; (e.currentTarget as HTMLButtonElement).style.borderColor = `${c.border}44` }}
                     >
                       <div style={{ fontSize: 14, fontWeight: 800, color: c.border, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>{opt.type}</div>
                       <div style={{ fontSize: 19, fontWeight: 700, marginBottom: 4 }}>{opt.label}</div>
