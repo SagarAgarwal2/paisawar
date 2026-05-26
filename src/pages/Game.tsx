@@ -432,7 +432,7 @@ function SetupScreen({ mode, botCount, setBotCount, onStart, onBack }: { mode: s
 
         <div style={{ background: '#1a2235', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px 16px', marginBottom: 24, fontSize: 13, color: '#64748b' }}>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <div>🎯 Race to <span style={{ color: '#f59e0b', fontWeight: 700 }}>₹25 Lakhs</span></div>
+            <div>🎯 Race to <span style={{ color: '#f59e0b', fontWeight: 700 }}>₹50 Lakhs</span></div>
             <div>⏱ <span style={{ color: '#f1f5f9', fontWeight: 600 }}>25 min</span> time limit</div>
             <div>🃏 <span style={{ color: '#f1f5f9', fontWeight: 600 }}>65+</span> card deck</div>
             {mode === 'ranked' && <div>⚡ <span style={{ color: '#60a5fa', fontWeight: 600 }}>RP at stake</span></div>}

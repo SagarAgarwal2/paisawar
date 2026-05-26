@@ -3,7 +3,7 @@ import type { GameState, PlayerState } from '../types/game'
 import { createGameDeck } from '../data/cards'
 
 const STARTING_WEALTH = 500000
-const WEALTH_GOAL = 2500000      // ₹25 Lakhs — matches single-player
+const WEALTH_GOAL = 5000000      // ₹50 Lakhs — matches single-player
 const TIME_LIMIT_MS = 25 * 60 * 1000
 
 function generateRoomCode(): string {
@@ -164,7 +164,7 @@ export function buildInitialGameState(players: RoomPlayer[]): GameState {
     pendingDecision: null,
     pendingTarget: null,
     winner: null,
-    log: ['Game started! First to ₹25 Lakhs wins.'],
+    log: ['Game started! First to ₹50 Lakhs wins.'],
     wealthGoal: WEALTH_GOAL,
     timeLimit: TIME_LIMIT_MS,
     startTime: Date.now(),

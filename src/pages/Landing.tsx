@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
-import { formatWealth } from '../types/game'
 
 const FEATURE_CARDS = [
   { icon: '🎴', title: 'Real Indian Money Decisions', desc: 'Every card puts you in a situation you might face in real life. SIPs, EMIs, Tax Raids, IPOs — your choices decide your fate.' },
@@ -76,7 +75,7 @@ export function Landing() {
           </h1>
 
           <p style={{ fontSize: 'clamp(16px, 2.5vw, 20px)', color: '#94a3b8', maxWidth: 560, margin: '0 auto 40px', lineHeight: 1.6 }}>
-            A fast-paced financial card game with real Indian money decisions. Race to {formatWealth(5000000)} through SIPs, Market Crashes, Tax Raids, and more.
+            A fast-paced financial card game with real Indian money decisions. Race to ₹50 Lakhs through SIPs, Market Crashes, Tax Raids, and more.
           </p>
 
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>

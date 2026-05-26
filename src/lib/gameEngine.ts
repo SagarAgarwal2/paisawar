@@ -2,7 +2,7 @@ import type { GameState, PlayerState, GameCard, CardEffect, DecisionChoice } fro
 import { createGameDeck } from '../data/cards'
 
 const STARTING_WEALTH = 500000   // ₹5 Lakhs
-const WEALTH_GOAL = 2500000      // ₹25 Lakhs — reachable in ~15-25 turns
+const WEALTH_GOAL = 5000000      // ₹50 Lakhs
 const TIME_LIMIT_MS = 45 * 1000  // 45 seconds per turn
 
 const BOT_NAMES = ['Rahul AI', 'Priya Bot', 'Arjun AI', 'Sneha Bot', 'Vikram AI']
@@ -53,7 +53,7 @@ export function initGame(humanPlayer: { id: string; name: string }, botCount: nu
     pendingDecision: null,
     pendingTarget: null,
     winner: null,
-    log: ['Game started! First to ₹25 Lakhs wins.'],
+    log: ['Game started! First to ₹50 Lakhs wins.'],
     wealthGoal: WEALTH_GOAL,
     timeLimit: TIME_LIMIT_MS,
     startTime: Date.now(),
@@ -302,7 +302,7 @@ function checkWinCondition(state: GameState): GameState {
       ...state,
       winner,
       phase: 'game_over',
-      log: [`🏆 ${winner.name} reached ₹25 Lakhs and WINS!`, ...state.log].slice(0, 20),
+      log: [`🏆 ${winner.name} reached ₹50 Lakhs and WINS!`, ...state.log].slice(0, 20),
     }
   }
   return state

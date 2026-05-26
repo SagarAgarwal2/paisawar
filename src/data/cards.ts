@@ -1,6 +1,6 @@
 import type { GameCard } from '../types/game'
 
-// Starting wealth: ₹5L  |  Win goal: ₹25L  |  ~15-25 turns to win with good play
+// Starting wealth: ₹5L  |  Win goal: ₹50 Lakhs  |  ~20-25 turns to win with good play
 // Card values are tuned so invest choices gain ~₹2-5L, attacks cost ~₹1-3L
 // A focused player can win in ~15 turns; a bad run might take 25-30.
 
