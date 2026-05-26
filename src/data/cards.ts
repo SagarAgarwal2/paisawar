@@ -165,8 +165,8 @@ export const ACTION_CARDS: GameCard[] = [
     name: 'Market Crash',
     type: 'action',
     tier: 'rare',
-    flavor: 'Sensex crashes 20%. Others bleed.',
-    effect: { type: 'attack_all_pct', value: 15, target: 'others' },
+    flavor: 'Sensex crashes 20%. The entire market bleeds.',
+    effect: { type: 'attack_all_pct', value: 15, target: 'all' },
   },
   {
     id: 'ac_steal',
@@ -245,8 +245,8 @@ export const ACTION_CARDS: GameCard[] = [
     name: 'Recession Wave',
     type: 'action',
     tier: 'epic',
-    flavor: 'Global economy tanks. Others lose wealth.',
-    effect: { type: 'attack_all_pct', value: 20, target: 'others' },
+    flavor: 'Global economy tanks. Everyone loses wealth.',
+    effect: { type: 'attack_all_pct', value: 20, target: 'all' },
   },
 ]
 

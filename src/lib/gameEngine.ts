@@ -2,9 +2,10 @@ import type { GameState, PlayerState, GameCard, CardEffect, DecisionChoice } fro
 import { createGameDeck } from '../data/cards'
 import { SEASONS } from '../data/mockData'
 
-const STARTING_WEALTH = 500000   // ₹5 Lakhs
-const WEALTH_GOAL = 5000000      // ₹50 Lakhs
-const TIME_LIMIT_MS = 15 * 60 * 1000  // 15 minutes per game limit
+export const STARTING_WEALTH = 500000   // ₹5 Lakhs
+export const WEALTH_GOAL = 5000000      // ₹50 Lakhs
+export const TIME_LIMIT_MS = 15 * 60 * 1000  // 15 minutes per game limit
+export const TURN_TIME_LIMIT_MS = 60000 // 60 seconds per turn
 
 const BOT_NAMES = ['Rahul AI', 'Priya Bot', 'Arjun AI', 'Sneha Bot', 'Vikram AI']
 
@@ -67,7 +68,11 @@ export function initGame(humanPlayer: { id: string; name: string }, botCount: nu
 function refillDeck(state: GameState): GameState {
   if (state.deck.length > 0) return state
   if (state.discardPile.length > 0) {
-    const shuffled = [...state.discardPile].sort(() => Math.random() - 0.5)
+    const shuffled = [...state.discardPile]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
     return { ...state, deck: shuffled, discardPile: [], log: ['Deck reshuffled.', ...state.log].slice(0, 20) }
   }
   // Both empty — create a completely fresh deck
@@ -480,7 +485,22 @@ export function doBotTurn(state: GameState): { state: GameState; delay: number }
 }
 
 export function startDrawPhase(state: GameState, playerIndex: number): { state: GameState; card: GameCard | null } {
-  return drawCard(state, playerIndex)
+  let currentState = state;
+  let lastDrawnCard = null;
+  
+  // Always draw at least 1 card, then draw up to 4
+  const res = drawCard(currentState, playerIndex);
+  currentState = res.state;
+  lastDrawnCard = res.card;
+
+  while (currentState.players[playerIndex].hand.length < 4) {
+    const r = drawCard(currentState, playerIndex);
+    currentState = r.state;
+    if (!r.card) break;
+    lastDrawnCard = r.card;
+  }
+  
+  return { state: currentState, card: lastDrawnCard };
 }
 
 export function calculateRPChange(placement: number, totalPlayers: number, winStreak: number): number {

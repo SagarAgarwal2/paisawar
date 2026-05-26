@@ -6,7 +6,7 @@ import { Button } from '../components/ui/Button'
 import type { GameState, GameCard as GameCardType } from '../types/game'
 import { formatWealth } from '../types/game'
 import {
-  processDecision, processAction, processDefense, advanceTurn, startDrawPhase, forceSkipTurn,
+  processDecision, processAction, processDefense, advanceTurn, startDrawPhase, forceSkipTurn, TURN_TIME_LIMIT_MS
 } from '../lib/gameEngine'
 import { pushGameState } from '../lib/multiplayerEngine'
 import { saveGameResult } from '../lib/auth'
@@ -477,7 +477,7 @@ export function MultiplayerGame() {
           
           <TurnTimer 
             turnStartTime={gameState.turnStartTime} 
-            timeLimit={gameState.timeLimit} 
+            timeLimit={TURN_TIME_LIMIT_MS} 
             active={gameState.phase !== 'game_over' && (isMyTurn || gameState.players[0].id === myPlayerId)} 
             onTimeout={handleTimeout} 
           />
@@ -565,13 +565,20 @@ export function MultiplayerGame() {
                   return (
                     <button
                       key={opt.type}
-                      className={opt.type}
                       onClick={() => handleDecision(opt.type)}
                       style={{
                         flex: '1 1 180px', padding: '16px 18px', borderRadius: 12,
-                        cursor: 'pointer', textAlign: 'left',
+                        background: `${c.bg}1a`, border: `2px solid ${c.border}55`,
+                        color: '#f1f5f9', cursor: 'pointer', textAlign: 'left',
                         transition: 'all 0.15s', fontFamily: 'inherit',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                      }}
+                      onMouseEnter={e => {
+                        (e.currentTarget as HTMLButtonElement).style.background = `${c.bg}33`
+                        ;(e.currentTarget as HTMLButtonElement).style.borderColor = c.border
+                      }}
+                      onMouseLeave={e => {
+                        (e.currentTarget as HTMLButtonElement).style.background = `${c.bg}1a`
+                        ;(e.currentTarget as HTMLButtonElement).style.borderColor = `${c.border}55`
                       }}
                     >
                       <div style={{ fontSize: 13, fontWeight: 800, color: c.border, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>
