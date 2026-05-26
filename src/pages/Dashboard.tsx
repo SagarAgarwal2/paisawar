@@ -29,6 +29,7 @@ export function Dashboard() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [leaderboardLoading, setLeaderboardLoading] = useState(false)
   const [showTutorial, setShowTutorial] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
   useEffect(() => {
     if (localStorage.getItem('justRegistered') === 'true') {
@@ -80,7 +81,16 @@ export function Dashboard() {
         height: 60,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: 18, color: '#f59e0b' }}>PAISA WAR</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button 
+            className="desktop-only"
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+            style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', padding: 4 }}
+          >
+            ☰
+          </button>
+          <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: 18, color: '#f59e0b' }}>PAISA WAR</div>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#1a2235', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '5px 12px' }}>
             <span style={{ fontSize: 14 }}>🪙</span>
@@ -92,6 +102,7 @@ export function Dashboard() {
 
       <div style={{ display: 'flex', flex: 1 }}>
         {/* Sidebar (Desktop) */}
+        {isSidebarOpen && (
         <aside className="glass-panel desktop-flex" style={{
           width: 220, flexShrink: 0,
           borderTop: 'none', borderLeft: 'none', borderBottom: 'none',
@@ -144,6 +155,7 @@ export function Dashboard() {
             {profile && <RankBadge rp={rp} showProgress size="sm" />}
           </div>
         </aside>
+        )}
 
         {/* Main Content */}
         <main style={{ flex: 1, padding: '24px', overflowY: 'auto', animation: 'fadeIn 0.3s ease', paddingBottom: '90px' }}>
