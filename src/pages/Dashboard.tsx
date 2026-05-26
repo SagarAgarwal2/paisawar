@@ -157,7 +157,6 @@ export function Dashboard() {
         </aside>
         )}
 
-        {/* Main Content */}
         <main style={{ flex: 1, padding: '24px', overflowY: 'auto', animation: 'fadeIn 0.3s ease', paddingBottom: '90px' }}>
           {tab === 'home' && <HomeTab navigate={navigate} profile={profile} currentSeason={currentSeason} />}
           {tab === 'leaderboard' && <LeaderboardTab leaderboard={leaderboard} loading={leaderboardLoading} profile={profile} onRefresh={fetchLeaderboard} />}
@@ -226,7 +225,7 @@ function HomeTab({ navigate, profile, currentSeason }: { navigate: (path: string
   }, [])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 900 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 900, width: '100%', margin: '0 auto' }}>
       {/* Welcome */}
       <div style={{ background: 'linear-gradient(135deg, rgba(37,99,235,0.15), rgba(245,158,11,0.1))', border: '1px solid rgba(37,99,235,0.2)', borderRadius: 16, padding: '24px 28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
@@ -306,7 +305,7 @@ function HomeTab({ navigate, profile, currentSeason }: { navigate: (path: string
 
 function LeaderboardTab({ leaderboard, loading, profile, onRefresh }: { leaderboard: LeaderboardEntry[]; loading: boolean; profile: ReturnType<typeof useAuth>['profile']; onRefresh: () => void }) {
   return (
-    <div style={{ maxWidth: 700 }}>
+    <div style={{ maxWidth: 700, width: '100%', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>Leaderboard</h2>
         <button onClick={onRefresh} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '6px 14px', color: '#94a3b8', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}>
