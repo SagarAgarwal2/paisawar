@@ -46,6 +46,11 @@ export async function updateProfile(userId: string, updates: Partial<Profile>): 
   if (error) throw error
 }
 
+export interface GameStats {
+  investChoices: number;
+  emiDamageTaken: boolean;
+}
+
 export async function saveGameResult(
   userId: string,
   username: string,
@@ -53,7 +58,8 @@ export async function saveGameResult(
   finalWealth: number,
   placement: number = 1,
   totalPlayers: number = 2,
-  winStreak: number = 0
+  winStreak: number = 0,
+  stats: GameStats = { investChoices: 0, emiDamageTaken: false }
 ): Promise<void> {
   // Upsert leaderboard entry
   const { data: existing } = await supabase
@@ -87,9 +93,10 @@ export async function saveGameResult(
   }
 
   // Update profile stats
+  let awardedDc = 0;
   const { data: profile } = await supabase
     .from('profiles')
-    .select('games_played, games_won, win_streak, max_win_streak, rank_points, total_xp')
+    .select('games_played, games_won, win_streak, max_win_streak, rank_points, total_xp, daanik_coins')
     .eq('id', userId)
     .maybeSingle()
 
@@ -109,5 +116,61 @@ export async function saveGameResult(
         updated_at: new Date().toISOString(),
       })
       .eq('id', userId)
+
+    // Process Contracts
+    try {
+      const { data: activeContracts } = await supabase
+        .from('daily_contracts')
+        .select('*')
+        .gte('contract_date', new Date().toISOString().split('T')[0])
+
+      if (activeContracts && activeContracts.length > 0) {
+        for (const contract of activeContracts) {
+          // Calculate progress increment for this game
+          let increment = 0;
+          if (contract.requirement_type === 'wins' && won) increment = 1;
+          if (contract.requirement_type === 'weekly_wins' && won) increment = 1;
+          if (contract.requirement_type === 'invest_choices') increment = stats.investChoices;
+          if (contract.requirement_type === 'no_emi_win' && won && !stats.emiDamageTaken) increment = 1;
+
+          if (increment > 0) {
+            // Check existing progress
+            const { data: pContract } = await supabase
+              .from('player_contracts')
+              .select('*')
+              .eq('player_id', userId)
+              .eq('contract_id', contract.id)
+              .maybeSingle();
+
+            const currentProgress = pContract ? pContract.progress : 0;
+            const newProgress = currentProgress + increment;
+            const isNewlyCompleted = !pContract?.completed && newProgress >= contract.requirement_value;
+
+            // Upsert progress
+            await supabase.from('player_contracts').upsert({
+              player_id: userId,
+              contract_id: contract.id,
+              progress: newProgress,
+              completed: isNewlyCompleted || (pContract?.completed ?? false),
+              completed_at: isNewlyCompleted ? new Date().toISOString() : pContract?.completed_at,
+            });
+
+            if (isNewlyCompleted) {
+              awardedDc += contract.reward_dc;
+            }
+          }
+        }
+
+        // Award DC if any contracts were completed
+        if (awardedDc > 0) {
+          await supabase
+            .from('profiles')
+            .update({ daanik_coins: (profile.daanik_coins || 0) + awardedDc })
+            .eq('id', userId);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to process contracts', e);
+    }
   }
 }

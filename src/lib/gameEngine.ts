@@ -19,6 +19,8 @@ function createPlayer(id: string, name: string, isBot: boolean, rankPoints?: num
     pendingGains: [],
     wealthFloor: 0,
     doubleInvestActive: false,
+    investChoices: 0,
+    emiDamageTaken: false,
     profile: isBot ? { rank_points: rankPoints ?? 1500, avatar_url: null } : undefined,
   }
 }
@@ -98,12 +100,19 @@ function applyEffect(state: GameState, effect: CardEffect, sourcePlayerIndex: nu
   switch (effect.type) {
     case 'wealth_change': {
       const val = effect.value ?? 0
+      // If it's a gain, doubleInvestActive applies
+      const doubled = (source.doubleInvestActive && effect.target === 'self' && val > 0) ? val * 2 : val
+      const targetP = effect.target === 'self' ? source : target
+      let newWealth = targetP.wealth + doubled
+      let newFloor = targetP.wealthFloor
+      if (newWealth < newFloor) {
+        newWealth = newFloor
+        newFloor = 0 // Shield breaks!
+      }
       if (effect.target === 'self') {
-        // Apply doubleInvestActive bonus if positive
-        const doubled = (source.doubleInvestActive && val > 0) ? val * 2 : val
-        players[sourcePlayerIndex] = { ...source, wealth: clampWealth(source.wealth + doubled, source.wealthFloor) }
-      } else if (effect.target === 'target') {
-        players[targetPlayerIndex] = { ...target, wealth: clampWealth(target.wealth + val, target.wealthFloor) }
+        players[sourcePlayerIndex] = { ...source, wealth: Math.max(0, newWealth), wealthFloor: newFloor }
+      } else {
+        players[targetPlayerIndex] = { ...target, wealth: Math.max(0, newWealth), wealthFloor: newFloor }
       }
       break
     }
@@ -128,7 +137,13 @@ function applyEffect(state: GameState, effect: CardEffect, sourcePlayerIndex: nu
     }
     case 'steal': {
       const amount = Math.min(effect.value ?? 0, target.wealth)
-      players[targetPlayerIndex] = { ...target, wealth: clampWealth(target.wealth - amount, target.wealthFloor) }
+      let newWealth = target.wealth - amount
+      let newFloor = target.wealthFloor
+      if (newWealth < newFloor) {
+        newWealth = newFloor
+        newFloor = 0 // Shield breaks!
+      }
+      players[targetPlayerIndex] = { ...target, wealth: Math.max(0, newWealth), wealthFloor: newFloor }
       players[sourcePlayerIndex] = { ...source, wealth: source.wealth + amount }
       break
     }
@@ -140,7 +155,13 @@ function applyEffect(state: GameState, effect: CardEffect, sourcePlayerIndex: nu
       players = players.map((p, i) => {
         if (effect.target === 'others' && i === sourcePlayerIndex) return p
         const loss = Math.floor(p.wealth * scaledPct)
-        return { ...p, wealth: clampWealth(p.wealth - loss, p.wealthFloor) }
+        let newWealth = p.wealth - loss
+        let newFloor = p.wealthFloor
+        if (p.wealthFloor !== undefined && newWealth < p.wealthFloor) {
+          newWealth = p.wealthFloor
+          newFloor = 0 // The shield breaks after saving them!
+        }
+        return { ...p, wealth: Math.max(0, newWealth), wealthFloor: newFloor }
       })
       break
     }
@@ -151,7 +172,13 @@ function applyEffect(state: GameState, effect: CardEffect, sourcePlayerIndex: nu
     case 'market_crash_player': {
       const pct = (effect.value ?? 50) / 100
       const loss = Math.floor(target.wealth * pct)
-      players[targetPlayerIndex] = { ...target, wealth: clampWealth(target.wealth - loss, target.wealthFloor) }
+      let newWealth = target.wealth - loss
+      let newFloor = target.wealthFloor
+      if (newWealth < newFloor) {
+        newWealth = newFloor
+        newFloor = 0 // Shield breaks!
+      }
+      players[targetPlayerIndex] = { ...target, wealth: Math.max(0, newWealth), wealthFloor: newFloor }
       break
     }
     case 'wealth_floor': {
@@ -200,9 +227,13 @@ export function processDecision(state: GameState, playerIndex: number, choice: D
 
   // applyEffect handles doubleInvestActive bonus internally
   let newState = applyEffect(state, scaledEffect, playerIndex, playerIndex)
-  // Clear doubleInvestActive after use
+  // Clear doubleInvestActive after use, and increment investChoices if choice was invest
   const players = newState.players.map((p, i) =>
-    i === playerIndex ? { ...p, doubleInvestActive: false } : p
+    i === playerIndex ? { 
+      ...p, 
+      doubleInvestActive: false,
+      investChoices: p.investChoices + (choice === 'invest' ? 1 : 0)
+    } : p
   )
   newState = { ...newState, players }
 
@@ -251,6 +282,11 @@ export function processAction(state: GameState, playerIndex: number, card: GameC
   let newState = { ...state, players: updatedPlayersForDefense, discardPile }
   if (!isDefended) {
     newState = applyEffect(newState, card.effect, playerIndex, targetIndex)
+    // If it was an EMI bomb, mark target as having taken EMI damage
+    if (card.id === 'ac_emi_bomb') {
+      const p = newState.players[targetIndex];
+      newState.players[targetIndex] = { ...p, emiDamageTaken: true };
+    }
   }
 
   // Now process the played action card

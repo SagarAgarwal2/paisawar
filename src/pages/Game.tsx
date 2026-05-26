@@ -66,7 +66,8 @@ export function Game() {
       else playSound('lose')
       saveGameResult(
         profile.id, profile.username, isWinner, humanPlayer.wealth,
-        placement, finalState.players.length, profile.win_streak ?? 0
+        placement, finalState.players.length, profile.win_streak ?? 0,
+        { investChoices: humanPlayer.investChoices, emiDamageTaken: humanPlayer.emiDamageTaken }
       ).then(() => { refreshProfile() })
     }
   }, [profile, humanPlayerIndex, refreshProfile])

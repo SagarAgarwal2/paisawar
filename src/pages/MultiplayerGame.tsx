@@ -65,11 +65,15 @@ export function MultiplayerGame() {
     if (!p) return
     resultSavedRef.current = true
     const isWinner = state.winner?.id === p.id
-    const myWealth = state.players.find(pl => pl.id === p.id)?.wealth ?? 0
+    const myFinalPlayer = state.players.find(pl => pl.id === p.id)
+    const myWealth = myFinalPlayer?.wealth ?? 0
     const placement = [...state.players]
       .sort((a, b) => b.wealth - a.wealth)
       .findIndex(pl => pl.id === p.id) + 1
-    await saveGameResult(p.id, p.username, isWinner, myWealth, placement, state.players.length, p.win_streak ?? 0)
+    await saveGameResult(p.id, p.username, isWinner, myWealth, placement, state.players.length, p.win_streak ?? 0, {
+      investChoices: myFinalPlayer?.investChoices ?? 0,
+      emiDamageTaken: myFinalPlayer?.emiDamageTaken ?? false
+    })
     await refreshProfile()
   }
 

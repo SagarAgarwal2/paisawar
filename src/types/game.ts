@@ -43,6 +43,8 @@ export interface PlayerState {
   pendingGains: { amount: number; triggerAt: 'next_turn' | 'end_game'; cardId: string }[]
   wealthFloor: number
   doubleInvestActive: boolean
+  investChoices: number
+  emiDamageTaken: boolean
   profile?: {
     rank_points: number
     avatar_url: string | null

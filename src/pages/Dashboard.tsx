@@ -361,9 +361,43 @@ function LeaderboardTab({ leaderboard, loading, profile, onRefresh }: { leaderbo
 
 
 function ContractsTab() {
-  const contracts = DAILY_CONTRACTS
-  const mockProgress: Record<string, number> = {} // No progress yet for beta
+  const { profile } = useAuth()
+  const [contracts, setContracts] = useState<any[]>([])
+  const [progressData, setProgressData] = useState<Record<string, { progress: number, completed: boolean }>>({})
   const [resetTime, setResetTime] = useState('Calculating...')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchContracts() {
+      if (!profile) return
+      try {
+        const { data: activeContracts } = await supabase
+          .from('daily_contracts')
+          .select('*')
+          .gte('contract_date', new Date().toISOString().split('T')[0])
+        
+        if (activeContracts) setContracts(activeContracts)
+
+        const { data: pContracts } = await supabase
+          .from('player_contracts')
+          .select('*')
+          .eq('player_id', profile.id)
+
+        if (pContracts) {
+          const pMap: Record<string, { progress: number, completed: boolean }> = {}
+          for (const pc of pContracts) {
+            pMap[pc.contract_id] = { progress: pc.progress, completed: pc.completed }
+          }
+          setProgressData(pMap)
+        }
+      } catch (err) {
+        console.error('Error fetching contracts:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchContracts()
+  }, [profile])
 
   useEffect(() => {
     const updateTimer = () => {
@@ -380,7 +414,7 @@ function ContractsTab() {
     return () => clearInterval(interval)
   }, [])
 
-  const difficultyColors = { easy: '#10b981', medium: '#f59e0b', hard: '#ef4444' }
+  const difficultyColors: Record<string, string> = { easy: '#10b981', medium: '#f59e0b', hard: '#ef4444' }
 
   return (
     <div style={{ maxWidth: 700 }}>
@@ -389,52 +423,62 @@ function ContractsTab() {
         <div style={{ fontSize: 13, color: '#64748b' }}>Resets in <span style={{ color: '#f59e0b', fontWeight: 700 }}>{resetTime}</span></div>
       </div>
 
-      {Object.keys(mockProgress).length === 0 && (
-        <Card style={{ padding: 24, textAlign: 'center', marginBottom: 20, background: 'rgba(59,130,246,0.05)', borderColor: 'rgba(59,130,246,0.2)' }}>
-          <div style={{ fontSize: 24, marginBottom: 8 }}>🎮</div>
-          <h3 style={{ fontSize: 16, fontWeight: 700, color: '#60a5fa', marginBottom: 4 }}>Start Your Journey</h3>
-          <p style={{ fontSize: 14, color: '#94a3b8' }}>Play a game to start earning contract progress and unlock rewards!</p>
+      {loading ? (
+        <div style={{ textAlign: 'center', color: '#64748b', padding: 40 }}>Loading active contracts...</div>
+      ) : contracts.length === 0 ? (
+        <Card style={{ padding: 24, textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)' }}>
+          <div style={{ color: '#94a3b8' }}>No active contracts for today. Check back tomorrow!</div>
         </Card>
-      )}
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {contracts.map(contract => {
-          const progress = mockProgress[contract.id] ?? 0
-          const completed = progress >= contract.requirement_value
-          const pct = Math.min(100, (progress / contract.requirement_value) * 100)
-          const color = difficultyColors[contract.difficulty]
-
-          return (
-            <Card key={contract.id} style={{ padding: 20, borderColor: completed ? 'rgba(16,185,129,0.3)' : contract.is_weekly ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.08)', background: completed ? 'rgba(16,185,129,0.05)' : contract.is_weekly ? 'rgba(245,158,11,0.04)' : undefined }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: `${color}22`, color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {contract.difficulty}
-                    </span>
-                    {contract.is_weekly && <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: 'rgba(245,158,11,0.2)', color: '#f59e0b' }}>WEEKLY</span>}
-                    {completed && <span style={{ fontSize: 11, fontWeight: 700, color: '#10b981' }}>✓ COMPLETE</span>}
-                  </div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', marginBottom: 4, fontFamily: 'Space Grotesk, sans-serif' }}>{contract.title}</div>
-                  <div style={{ fontSize: 13, color: '#64748b', marginBottom: 10 }}>{contract.description}</div>
-
-                  <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${pct}%`, background: completed ? '#10b981' : color, borderRadius: 2, transition: 'width 0.5s ease' }} />
-                  </div>
-                  <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>{progress}/{contract.requirement_value}</div>
-                </div>
-
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif' }}>🪙 {contract.reward_dc}</div>
-                  {contract.reward_card_tier && (
-                    <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>+ 1 {contract.reward_card_tier} card</div>
-                  )}
-                </div>
-              </div>
+      ) : (
+        <>
+          {Object.keys(progressData).length === 0 && (
+            <Card style={{ padding: 24, textAlign: 'center', marginBottom: 20, background: 'rgba(59,130,246,0.05)', borderColor: 'rgba(59,130,246,0.2)' }}>
+              <div style={{ fontSize: 24, marginBottom: 8 }}>🎮</div>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#60a5fa', marginBottom: 4 }}>Start Your Journey</h3>
+              <p style={{ fontSize: 14, color: '#94a3b8' }}>Play a game to start earning contract progress and unlock rewards!</p>
             </Card>
-          )
-        })}
-      </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {contracts.map(contract => {
+              const progress = progressData[contract.id]?.progress ?? 0
+              const completed = progressData[contract.id]?.completed ?? false
+              const pct = Math.min(100, (progress / contract.requirement_value) * 100)
+              const color = difficultyColors[contract.difficulty] || '#3b82f6'
+
+              return (
+                <Card key={contract.id} style={{ padding: 20, borderColor: completed ? 'rgba(16,185,129,0.3)' : contract.is_weekly ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.08)', background: completed ? 'rgba(16,185,129,0.05)' : contract.is_weekly ? 'rgba(245,158,11,0.04)' : undefined }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: `${color}22`, color, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          {contract.difficulty}
+                        </span>
+                        {contract.is_weekly && <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: 'rgba(245,158,11,0.2)', color: '#f59e0b' }}>WEEKLY</span>}
+                        {completed && <span style={{ fontSize: 11, fontWeight: 700, color: '#10b981' }}>✓ COMPLETE</span>}
+                      </div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', marginBottom: 4, fontFamily: 'Space Grotesk, sans-serif' }}>{contract.title}</div>
+                      <div style={{ fontSize: 13, color: '#64748b', marginBottom: 10 }}>{contract.description}</div>
+
+                      <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${pct}%`, background: completed ? '#10b981' : color, borderRadius: 2, transition: 'width 0.5s ease' }} />
+                      </div>
+                      <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>{Math.min(progress, contract.requirement_value)}/{contract.requirement_value}</div>
+                    </div>
+
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif' }}>🪙 {contract.reward_dc}</div>
+                      {contract.reward_card_tier && (
+                        <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 2 }}>+ 1 {contract.reward_card_tier} card</div>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              )
+            })}
+          </div>
+        </>
+      )}
     </div>
   )
 }
