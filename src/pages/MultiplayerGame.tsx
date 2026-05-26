@@ -15,6 +15,7 @@ import { supabase } from '../lib/supabase'
 import { PlayerBoard } from '../components/game/PlayerBoard'
 import { GameLog } from '../components/game/GameLog'
 import { TurnTimer } from '../components/game/TurnTimer'
+import { ForfeitModal } from '../components/ForfeitModal'
 import { playSound } from '../lib/audio'
 
 type UIPhase = 'loading' | 'playing' | 'decision' | 'targeting' | 'result'
@@ -27,6 +28,7 @@ export function MultiplayerGame() {
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [uiPhase, setUiPhase] = useState<UIPhase>('loading')
   const [notification, setNotification] = useState<string | null>(null)
+  const [showForfeitModal, setShowForfeitModal] = useState(false)
   const [onlinePlayers, setOnlinePlayers] = useState<Set<string>>(new Set())
 
   // Use refs to avoid stale closures in async callbacks and subscriptions
@@ -302,6 +304,38 @@ export function MultiplayerGame() {
     notify('Blocked the attack!')
   }
 
+  const handleForfeit = async () => {
+    setShowForfeitModal(false)
+    const gs = gameStateRef.current
+    if (!gs || !roomId || !myPlayerId) {
+      navigate('/dashboard')
+      return
+    }
+
+    // Set wealth to 0 to guarantee last place and end the game
+    const updatedPlayers = gs.players.map(p => {
+      if (p.id === myPlayerId) {
+        return { ...p, wealth: 0 }
+      }
+      return p
+    })
+    
+    const forfeitState = { 
+      ...gs, 
+      players: updatedPlayers, 
+      phase: 'game_over' as const,
+      log: [`${myPlayer?.name} forfeited the match.`, ...gs.log]
+    }
+    
+    setGameState(forfeitState)
+    gameStateRef.current = forfeitState
+    
+    await pushState(forfeitState)
+    // The player who forfeited is instantly navigated out to Dashboard.
+    // The remaining players will receive the updated game_over state and the ResultScreen.
+    navigate('/dashboard')
+  }
+
   // ---- Render ----
 
   if (uiPhase === 'loading' || !gameState) {
@@ -387,7 +421,10 @@ export function MultiplayerGame() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         borderRadius: 0, borderTop: 'none', borderLeft: 'none', borderRight: 'none',
       }}>
-        <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: 16, color: '#f59e0b' }}>
+        <button onClick={() => setShowForfeitModal(true)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}>
+          ← Leave Match
+        </button>
+        <div style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 800, fontSize: 16, color: '#f59e0b', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
           PAISA WAR
         </div>
         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
@@ -396,6 +433,13 @@ export function MultiplayerGame() {
           </span>
         </div>
       </div>
+
+      {showForfeitModal && (
+        <ForfeitModal 
+          onCancel={() => setShowForfeitModal(false)}
+          onConfirm={handleForfeit}
+        />
+      )}
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '16px 20px', gap: 14, maxWidth: 1100, margin: '0 auto', width: '100%' }}>
 

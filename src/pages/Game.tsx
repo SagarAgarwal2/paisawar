@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { GameCard } from '../components/GameCard'
 import { Button } from '../components/ui/Button'
+import { ForfeitModal } from '../components/ForfeitModal'
 import type { GameState, PlayerState, GameCard as GameCardType } from '../types/game'
 import { formatWealth } from '../types/game'
 import {
@@ -35,6 +36,7 @@ export function Game() {
   const [botCount, setBotCount] = useState(2)
   const [animating, setAnimating] = useState(false)
   const [notification, setNotification] = useState<string | null>(null)
+  const [showForfeitModal, setShowForfeitModal] = useState(false)
   const botTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const humanPlayerIndex = 0
@@ -64,6 +66,28 @@ export function Game() {
       })
     }
   }, [profile, humanPlayerIndex, refreshProfile])
+
+  const handleForfeit = () => {
+    setShowForfeitModal(false)
+    if (!gameState) {
+      navigate('/dashboard')
+      return
+    }
+    // Record a loss automatically
+    const forfeitState = { ...gameState, phase: 'game_over' as const }
+    setGameState(forfeitState)
+    setUiPhase('result')
+    if (profile?.id && profile?.username) {
+      const humanPlayer = forfeitState.players[humanPlayerIndex]
+      playSound('lose')
+      saveGameResult(profile.id, profile.username, false, humanPlayer.wealth).then(() => {
+        refreshProfile()
+        navigate('/dashboard')
+      })
+    } else {
+      navigate('/dashboard')
+    }
+  }
 
   // Bot turn handler
   useEffect(() => {
@@ -205,6 +229,12 @@ export function Game() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {showForfeitModal && (
+        <ForfeitModal 
+          onCancel={() => setShowForfeitModal(false)}
+          onConfirm={handleForfeit}
+        />
+      )}
       {/* Game Header */}
       <div className="glass-panel" style={{
         position: 'sticky', top: 0, zIndex: 40,
@@ -212,7 +242,7 @@ export function Game() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         borderRadius: 0, borderTop: 'none', borderLeft: 'none', borderRight: 'none',
       }}>
-        <button onClick={() => navigate('/dashboard')} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <button onClick={() => setShowForfeitModal(true)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 6 }}>
           ← Dashboard
         </button>
         <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
