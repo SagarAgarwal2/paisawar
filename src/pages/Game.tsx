@@ -398,7 +398,7 @@ export function Game() {
 
 function SetupScreen({ mode, botCount, setBotCount, onStart, onBack }: { mode: string; botCount: number; setBotCount: (n: number) => void; onStart: () => void; onBack: () => void }) {
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0e1a', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ width: '100%', maxWidth: 480, animation: 'slideUp 0.4s ease' }}>
         <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 6 }}>
           ← Back
@@ -408,7 +408,7 @@ function SetupScreen({ mode, botCount, setBotCount, onStart, onBack }: { mode: s
           {mode} mode
         </div>
 
-        <div style={{ background: '#1a2235', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: 28, marginBottom: 20 }}>
+        <div className="glass-panel" style={{ borderRadius: 16, padding: 28, marginBottom: 20 }}>
           <h3 style={{ fontSize: 15, fontWeight: 700, color: '#f1f5f9', marginBottom: 16 }}>AI Opponents</h3>
           <div style={{ display: 'flex', gap: 10 }}>
             {[1, 2, 3, 4, 5].map(n => (
@@ -422,35 +422,21 @@ function SetupScreen({ mode, botCount, setBotCount, onStart, onBack }: { mode: s
                   cursor: 'pointer', transition: 'all 0.15s', fontFamily: 'inherit',
                 }}
               >
-                <div className="glass-pill" style={{
-                  padding: '8px 12px',
-                  borderRadius: 12,
-                  fontSize: 13,
-                  color: botCount === n ? '#60a5fa' : '#94a3b8',
-                  lineHeight: 1.4,
-                }}>
-                  {n}
-                </div>
+                {n}
               </button>
             ))}
           </div>
           <p style={{ fontSize: 12, color: '#64748b', marginTop: 10 }}>Playing against {botCount} AI opponent{botCount > 1 ? 's' : ''} ({botCount + 1} players total)</p>
         </div>
 
-        <aside className="glass-panel" style={{
-          width: 320, flexShrink: 0,
-          borderLeft: '1px solid rgba(255,255,255,0.08)',
-          display: 'flex', flexDirection: 'column',
-          position: 'sticky', top: 60, height: 'calc(100vh - 60px)',
-          borderRadius: 0, borderTop: 'none', borderBottom: 'none', borderRight: 'none',
-        }}>
+        <div className="glass-panel" style={{ padding: '14px 16px', marginBottom: 24, fontSize: 13, color: '#64748b', borderRadius: 12, boxShadow: 'none' }}>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <div>🎯 Race to <span style={{ color: '#f59e0b', fontWeight: 700 }}>₹50 Lakhs</span></div>
             <div>⏱ <span style={{ color: '#f1f5f9', fontWeight: 600 }}>25 min</span> time limit</div>
             <div>🃏 <span style={{ color: '#f1f5f9', fontWeight: 600 }}>65+</span> card deck</div>
             {mode === 'ranked' && <div>⚡ <span style={{ color: '#60a5fa', fontWeight: 600 }}>RP at stake</span></div>}
           </div>
-        </aside>
+        </div>
 
         <Button size="lg" variant="gold" onClick={onStart} style={{ width: '100%' }}>
           Start Game
