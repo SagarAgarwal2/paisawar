@@ -31,8 +31,10 @@ export function Dashboard() {
   const [showTutorial, setShowTutorial] = useState(false)
 
   useEffect(() => {
-    if (!localStorage.getItem('hasSeenTutorial')) {
+    if (localStorage.getItem('justRegistered') === 'true') {
       setShowTutorial(true)
+      localStorage.removeItem('justRegistered')
+      localStorage.setItem('hasSeenTutorial', 'true')
     }
   }, [])
 

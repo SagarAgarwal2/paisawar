@@ -29,6 +29,7 @@ export function Auth() {
       } else {
         if (username.length < 3) { setError('Username must be at least 3 characters'); setLoading(false); return }
         await register(email, password, username)
+        localStorage.setItem('justRegistered', 'true')
       }
       navigate('/dashboard')
     } catch (err) {
