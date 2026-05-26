@@ -186,3 +186,47 @@ input, textarea, select {
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 9999px;
 }
+
+/* Mobile Responsiveness Utilities */
+.mobile-only {
+  display: none !important;
+}
+
+.desktop-only {
+  display: block !important;
+}
+
+.desktop-flex {
+  display: flex !important;
+}
+
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+.scroll-x::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+/* Base Responsive Rules */
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block !important;
+  }
+  .mobile-flex {
+    display: flex !important;
+  }
+  .desktop-only, .desktop-flex {
+    display: none !important;
+  }
+
+  /* Modals */
+  .modal-content {
+    width: 95vw !important;
+    padding: 20px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+}

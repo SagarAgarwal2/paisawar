@@ -229,22 +229,50 @@ export function processDecision(state: GameState, playerIndex: number, choice: D
 export function processAction(state: GameState, playerIndex: number, card: GameCard, targetIndex: number): GameState {
   if (!card.effect) return state
 
-  let newState = applyEffect(state, card.effect, playerIndex, targetIndex)
-  const discard = [...newState.discardPile, card]
-  const hand = newState.players[playerIndex].hand.filter(c => c.id !== card.id)
-  const updatedPlayers = newState.players.map((p, i) =>
-    i === playerIndex ? { ...p, hand } : p
+  // --- Auto-Defense Mechanic (Single Player) ---
+  // In single player, there is no async reaction phase. We auto-defend if the target has a defense card.
+  let isDefended = false
+  let updatedPlayersForDefense = [...state.players]
+  let discardPile = [...state.discardPile]
+
+  if (card.effect.target === 'target') {
+    const target = state.players[targetIndex]
+    const defCard = target.hand.find(c => c.type === 'defense')
+    if (defCard) {
+      isDefended = true
+      // Consume the defense card
+      discardPile.push(defCard)
+      const newHand = target.hand.filter(c => c.id !== defCard.id)
+      updatedPlayersForDefense[targetIndex] = { ...target, hand: newHand }
+    }
+  }
+
+  // Only apply the attack effect if it was NOT defended
+  let newState = { ...state, players: updatedPlayersForDefense, discardPile }
+  if (!isDefended) {
+    newState = applyEffect(newState, card.effect, playerIndex, targetIndex)
+  }
+
+  // Now process the played action card
+  const finalDiscard = [...newState.discardPile, card]
+  const sourceHand = newState.players[playerIndex].hand.filter(c => c.id !== card.id)
+  const finalPlayers = newState.players.map((p, i) =>
+    i === playerIndex ? { ...p, hand: sourceHand } : p
   )
 
   const targetName = state.players[targetIndex].name
-  const logEntry = card.effect.target === 'all' || card.effect.target === 'others'
+  let logEntry = card.effect.target === 'all' || card.effect.target === 'others'
     ? `${state.players[playerIndex].name} played ${card.name} — affects all!`
     : `${state.players[playerIndex].name} played ${card.name} → ${targetName}`
 
+  if (isDefended) {
+    logEntry += ` 🛡️ (${targetName} Auto-Defended!)`
+  }
+
   return checkWinCondition({
     ...newState,
-    players: updatedPlayers,
-    discardPile: discard,
+    players: finalPlayers,
+    discardPile: finalDiscard,
     playedCard: card,
     pendingTarget: null,
     log: [logEntry, ...newState.log].slice(0, 20),
@@ -399,8 +427,10 @@ export function doBotTurn(state: GameState): { state: GameState; delay: number }
     )
     finalState = { ...drawnState, players: updatedPlayers, discardPile: discard }
   } else {
-    // Discard the first non-defense card, or first card
-    const toDiscard = hand.find(c => c.type !== 'defense') ?? hand[0]
+    // PREVENT HOARDING: Bots should prioritize discarding defense cards in single-player
+    // because they don't have a reaction phase to use them.
+    // If they have no defense cards to discard, they discard their first card.
+    const toDiscard = hand.find(c => c.type === 'defense') ?? hand[0]
     const discard = [...drawnState.discardPile, toDiscard]
     const updatedHand = hand.filter(c => c.id !== toDiscard.id)
     const updatedPlayers = drawnState.players.map((p, i) =>

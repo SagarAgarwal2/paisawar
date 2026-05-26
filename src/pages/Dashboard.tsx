@@ -91,12 +91,12 @@ export function Dashboard() {
       </nav>
 
       <div style={{ display: 'flex', flex: 1 }}>
-        {/* Sidebar */}
-        <aside className="glass-panel" style={{
+        {/* Sidebar (Desktop) */}
+        <aside className="glass-panel desktop-flex" style={{
           width: 220, flexShrink: 0,
           borderTop: 'none', borderLeft: 'none', borderBottom: 'none',
           padding: '24px 16px',
-          display: 'flex', flexDirection: 'column', gap: 6,
+          flexDirection: 'column', gap: 6,
           position: 'sticky', top: 60, height: 'calc(100vh - 60px)',
           overflowY: 'auto',
           borderRadius: 0,
@@ -146,13 +146,45 @@ export function Dashboard() {
         </aside>
 
         {/* Main Content */}
-        <main style={{ flex: 1, padding: '24px', overflowY: 'auto', animation: 'fadeIn 0.3s ease' }}>
+        <main style={{ flex: 1, padding: '24px', overflowY: 'auto', animation: 'fadeIn 0.3s ease', paddingBottom: '90px' }}>
           {tab === 'home' && <HomeTab navigate={navigate} profile={profile} currentSeason={currentSeason} />}
           {tab === 'leaderboard' && <LeaderboardTab leaderboard={leaderboard} loading={leaderboardLoading} profile={profile} onRefresh={fetchLeaderboard} />}
           {tab === 'contracts' && <ContractsTab />}
           {tab === 'profile' && <ProfileTab profile={profile} />}
         </main>
       </div>
+
+      {/* Bottom Nav (Mobile) */}
+      <nav className="glass-panel mobile-flex" style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
+        padding: '8px 16px',
+        justifyContent: 'space-around', alignItems: 'center',
+        borderLeft: 'none', borderRight: 'none', borderBottom: 'none',
+        borderRadius: 0,
+        display: 'none', // Hidden by default, shown by .mobile-flex
+      }}>
+        {([
+          { id: 'home', label: 'Home', icon: '🏠' },
+          { id: 'leaderboard', label: 'Leaderboard', icon: '🏆' },
+          { id: 'contracts', label: 'Contracts', icon: '📋' },
+          { id: 'profile', label: 'Profile', icon: '👤' },
+        ] as const).map(item => (
+          <button
+            key={item.id}
+            onClick={() => setTab(item.id)}
+            style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+              padding: '8px', border: 'none', background: 'transparent',
+              color: tab === item.id ? '#60a5fa' : '#64748b',
+              cursor: 'pointer', fontSize: 10, fontWeight: 600, fontFamily: 'inherit',
+              transition: 'all 0.15s',
+            }}
+          >
+            <span style={{ fontSize: 20, marginBottom: 2 }}>{item.icon}</span>
+            {item.label}
+          </button>
+        ))}
+      </nav>
     </div>
   )
 }

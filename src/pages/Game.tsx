@@ -275,18 +275,22 @@ export function Game() {
           </div>
         )}
 
-        {/* Players Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+        {/* Players Scrollable Row */}
+        <div className="scroll-x" style={{ 
+          display: 'flex', gap: 12, paddingBottom: 8,
+          // on desktop it might wrap if we use flexWrap, but let's just let it scroll if needed
+        }}>
           {gameState.players.map((player, i) => (
-            <PlayerBoard
-              key={player.id}
-              player={player}
-              isCurrent={i === gameState.currentPlayerIndex}
-              isMe={i === humanPlayerIndex}
-              isTarget={uiPhase === 'targeting' && i !== humanPlayerIndex}
-              wealthGoal={gameState.wealthGoal}
-              onClick={() => handleTargetSelect(i)}
-            />
+            <div key={player.id} style={{ flex: '0 0 200px' }}>
+              <PlayerBoard
+                player={player}
+                isCurrent={i === gameState.currentPlayerIndex}
+                isMe={i === humanPlayerIndex}
+                isTarget={uiPhase === 'targeting' && i !== humanPlayerIndex}
+                wealthGoal={gameState.wealthGoal}
+                onClick={() => handleTargetSelect(i)}
+              />
+            </div>
           ))}
         </div>
 

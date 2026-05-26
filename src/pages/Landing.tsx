@@ -108,7 +108,7 @@ export function Landing() {
 
       {/* Stats Bar */}
       <section className="glass-panel" style={{ padding: '32px 24px', borderRadius: 0, borderLeft: 'none', borderRight: 'none' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, textAlign: 'center' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 24, textAlign: 'center' }}>
           {[
             { label: 'Cards', value: '108' },
             { label: 'Player Goal', value: '₹50L' },

@@ -440,19 +440,20 @@ export function MultiplayerGame() {
           </div>
         )}
 
-        {/* Player cards grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(175px, 1fr))', gap: 12 }}>
+        {/* Players Scrollable Row */}
+        <div className="scroll-x" style={{ display: 'flex', gap: 12, paddingBottom: 8 }}>
           {gameState.players.map((player, i) => (
-            <PlayerBoard
-              key={player.id}
-              player={player}
-              isCurrent={i === gameState.currentPlayerIndex}
-              isMe={player.id === myPlayerId}
-              isTarget={uiPhase === 'targeting' && player.id !== myPlayerId}
-              isOffline={!onlinePlayers.has(player.id)}
-              wealthGoal={gameState.wealthGoal}
-              onClick={() => handleTargetSelect(i)}
-            />
+            <div key={player.id} style={{ flex: '0 0 200px' }}>
+              <PlayerBoard
+                player={player}
+                isCurrent={i === gameState.currentPlayerIndex}
+                isMe={player.id === myPlayerId}
+                isTarget={uiPhase === 'targeting' && player.id !== myPlayerId}
+                isOffline={!onlinePlayers.has(player.id)}
+                wealthGoal={gameState.wealthGoal}
+                onClick={() => handleTargetSelect(i)}
+              />
+            </div>
           ))}
         </div>
 
