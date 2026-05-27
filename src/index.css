@@ -247,8 +247,20 @@ input, textarea, select {
 }
 
 .players-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 12px 4px 16px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  justify-content: center;
+}
+.players-container::-webkit-scrollbar {
+  display: none;
+}
+.players-container > div {
+  flex: 0 0 auto;
 }
 

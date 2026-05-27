@@ -1,0 +1,355 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+
+  background-color: #D1D8BE;
+  background-image:
+    radial-gradient(circle at 18% 22%, rgba(255, 255, 255, 0.38), transparent 34%),
+    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.24), transparent 30%),
+    radial-gradient(circle at 50% 78%, rgba(115, 135, 95, 0.18), transparent 38%),
+    radial-gradient(circle at 75% 72%, rgba(90, 110, 75, 0.10), transparent 32%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.16), rgba(125, 145, 105, 0.10));
+
+  background-size:
+    900px 900px,
+    850px 850px,
+    950px 950px,
+    700px 700px,
+    100% 100%;
+
+  background-blend-mode: soft-light;
+}
+
+.cards-section {
+  width: 100%;
+  min-height: 100vh;
+  padding: 50px 24px;
+}
+
+.cards-section h1 {
+  text-align: center;
+  margin-bottom: 45px;
+
+  font-size: 42px;
+  color: #08251e;
+  font-weight: 900;
+}
+
+.players-container {
+  width: 100%;
+  max-width: 1250px;
+  margin: 0 auto;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 26px;
+  flex-wrap: wrap;
+}
+
+/* Main square player card */
+.player-card {
+  --card-main: #1b5a40;
+  --card-dark: #08251e;
+  --badge-color: #2e7db8;
+
+  width: 170px;
+  height: 170px;
+
+  position: relative;
+  padding: 12px;
+  border-radius: 20px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(circle at 25% 20%, rgba(255,255,255,0.16), transparent 34%),
+    radial-gradient(circle at 90% 90%, rgba(255, 215, 90, 0.10), transparent 38%),
+    linear-gradient(145deg, var(--card-main), var(--card-dark) 78%);
+
+  border: 2px solid rgba(207, 174, 85, 0.75);
+
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -12px 24px rgba(0, 0, 0, 0.25);
+
+  overflow: hidden;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.player-card:hover {
+  transform: translateY(-6px);
+
+  box-shadow:
+    0 18px 34px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -12px 24px rgba(0, 0, 0, 0.25);
+}
+
+/* Soft highlight only, no thin intersecting line */
+.player-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.16), transparent 35%),
+    radial-gradient(circle at 80% 85%, rgba(255, 215, 90, 0.08), transparent 40%);
+
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Important: no .player-card::after inner border line */
+
+.avatar-wrap,
+.player-card h3,
+.balance-box,
+.shield-row,
+.rank-badge {
+  position: relative;
+  z-index: 2;
+}
+
+/* Avatar circle */
+.avatar-wrap {
+  width: 62px;
+  height: 62px;
+
+  border-radius: 50%;
+  padding: 3px;
+  flex-shrink: 0;
+
+  background:
+    linear-gradient(145deg, #f4d36b, var(--card-main), #061b16);
+
+  box-shadow:
+    0 5px 10px rgba(0,0,0,0.45),
+    inset 0 0 8px rgba(255, 225, 120, 0.3);
+}
+
+.player-avatar {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+
+  background: #cfe2c0;
+}
+
+/* Player name */
+.player-card h3 {
+  margin: 7px 0 6px;
+
+  font-size: 19px;
+  font-weight: 800;
+  color: #fff7df;
+
+  font-family: Georgia, "Times New Roman", serif;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.45);
+}
+
+/* Rank badge */
+.rank-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+
+  width: 30px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(145deg, var(--badge-color), #143254);
+
+  color: #fff7df;
+  font-size: 16px;
+  font-weight: 900;
+
+  clip-path: polygon(
+    50% 0%,
+    92% 16%,
+    84% 70%,
+    50% 100%,
+    16% 70%,
+    8% 16%
+  );
+
+  box-shadow:
+    0 3px 7px rgba(0,0,0,0.35),
+    inset 0 1px 3px rgba(255,255,255,0.3);
+}
+
+/* Balance amount */
+.balance-box {
+  padding: 6px 12px;
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(18, 55, 43, 0.95),
+      rgba(5, 22, 18, 0.95)
+    );
+
+  border: 1.5px solid rgba(221, 185, 78, 0.7);
+
+  color: #ffd34d;
+  font-size: 21px;
+  font-weight: 900;
+  line-height: 1;
+
+  text-shadow: 0 2px 4px rgba(0,0,0,0.45);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 4px 8px rgba(0,0,0,0.25);
+}
+
+/* Shield row */
+.shield-row {
+  margin-top: 8px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Shield icon */
+.shield {
+  width: 22px;
+  height: 25px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(145deg, var(--badge-color), #143254);
+
+  color: #ffe176;
+  font-size: 12px;
+  font-weight: 900;
+
+  clip-path: polygon(
+    50% 0%,
+    92% 16%,
+    84% 70%,
+    50% 100%,
+    16% 70%,
+    8% 16%
+  );
+
+  box-shadow:
+    0 3px 6px rgba(0,0,0,0.35),
+    inset 0 1px 3px rgba(255,255,255,0.25);
+}
+
+.grey-shield {
+  background:
+    linear-gradient(145deg, #777, #333);
+}
+
+/* Color themes */
+.theme-green {
+  --card-main: #1b5a40;
+  --card-dark: #08251e;
+  --badge-color: #2e7db8;
+}
+
+.theme-purple {
+  --card-main: #4a3d5e;
+  --card-dark: #211927;
+  --badge-color: #7c5799;
+}
+
+.theme-red {
+  --card-main: #88402e;
+  --card-dark: #2b1712;
+  --badge-color: #b84a32;
+}
+
+.theme-gold {
+  --card-main: #8d7130;
+  --card-dark: #2d2410;
+  --badge-color: #d99a22;
+}
+
+.theme-blue {
+  --card-main: #1e4f6b;
+  --card-dark: #071b26;
+  --badge-color: #2f8fd3;
+}
+
+.theme-orange {
+  --card-main: #9a5726;
+  --card-dark: #30190b;
+  --badge-color: #e28a27;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cards-section {
+    padding: 35px 16px;
+  }
+
+  .cards-section h1 {
+    font-size: 30px;
+    margin-bottom: 30px;
+  }
+
+  .players-container {
+    gap: 18px;
+  }
+
+  .player-card {
+    width: 155px;
+    height: 155px;
+    border-radius: 18px;
+  }
+
+  .avatar-wrap {
+    width: 56px;
+    height: 56px;
+  }
+
+  .player-card h3 {
+    font-size: 17px;
+  }
+
+  .balance-box {
+    font-size: 18px;
+    padding: 5px 10px;
+  }
+
+  .rank-badge {
+    width: 27px;
+    height: 31px;
+    font-size: 14px;
+  }
+
+  .shield {
+    width: 20px;
+    height: 23px;
+    font-size: 11px;
+  }
+}

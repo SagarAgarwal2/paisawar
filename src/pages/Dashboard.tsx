@@ -49,6 +49,7 @@ export function Dashboard() {
   }, [tab])
 
   const fetchLeaderboard = async () => {
+    if (leaderboard.length > 0) return // Basic cache for session
     setLeaderboardLoading(true)
     const { data } = await supabase
       .from('leaderboard')
@@ -161,7 +162,7 @@ export function Dashboard() {
           {tab === 'home' && <HomeTab navigate={navigate} profile={profile} currentSeason={currentSeason} />}
           {tab === 'leaderboard' && <LeaderboardTab leaderboard={leaderboard} loading={leaderboardLoading} profile={profile} onRefresh={fetchLeaderboard} />}
           {tab === 'contracts' && <ContractsTab />}
-          {tab === 'profile' && <ProfileTab profile={profile} />}
+          {tab === 'profile' && <ProfileTab />}
         </main>
       </div>
 
@@ -238,7 +239,6 @@ function HomeTab({ navigate, profile, currentSeason }: { navigate: (path: string
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <Button variant="gold" size="lg" onClick={() => navigate('/multiplayer')}>Play Online</Button>
             <Button variant="primary" onClick={() => navigate('/game')}>vs AI</Button>
-            <Button variant="secondary" onClick={() => navigate('/game?mode=casual')}>Casual</Button>
           </div>
         </div>
       </div>
@@ -483,41 +483,120 @@ function ContractsTab() {
   )
 }
 
-function ProfileTab({ profile }: { profile: ReturnType<typeof useAuth>['profile'] }) {
+function ProfileTab() {
+  const { profile, logout, refreshProfile } = useAuth()
+  const [isEditingAvatar, setIsEditingAvatar] = useState(false)
+  const [updating, setUpdating] = useState(false)
+
   const rp = profile?.rank_points ?? 0
   const winRate = profile && profile.games_played > 0 ? Math.round((profile.games_won / profile.games_played) * 100) : 0
+  
+  // Use first character of username if no avatar is set, or generic fallback
+  const fallbackAvatar = profile?.username ? profile.username[0].toUpperCase() : '👤'
+  const avatar = profile?.avatar_url || fallbackAvatar
+
+  const AVATARS = ['😎', '👽', '🤖', '🦊', '🐉', '💎', '🤑', '🦁', '🦉', '🚀', '👑', '👻']
+
+  const handleUpdateAvatar = async (newAvatar: string) => {
+    if (!profile) return
+    setUpdating(true)
+    await supabase.from('profiles').update({ avatar_url: newAvatar }).eq('id', profile.id)
+    await refreshProfile()
+    setIsEditingAvatar(false)
+    setUpdating(false)
+  }
 
   return (
-    <div style={{ maxWidth: 600 }}>
-      <Card style={{ padding: 28, marginBottom: 20 }}>
-        <div style={{ display: 'flex', gap: 20, alignItems: 'center', marginBottom: 24 }}>
-          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #1d4ed8, #0d9488)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 35, fontWeight: 700, color: '#fff', fontFamily: 'Space Grotesk, sans-serif' }}>
-            {(profile?.username?.[0] ?? '?').toUpperCase()}
-          </div>
-          <div>
-            <h2 style={{ fontSize: 28, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif', marginBottom: 4 }}>
-              {profile?.username ?? 'Unknown Player'}
-            </h2>
-            <RankBadge rp={rp} showProgress />
-          </div>
+    <div style={{ maxWidth: 750, width: '100%', margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <h2 style={{ fontSize: 28, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>Player Profile</h2>
+      </div>
+
+      <Card style={{ padding: 0, overflow: 'hidden', marginBottom: 32, border: '1px solid rgba(255,255,255,0.08)' }}>
+        {/* Banner */}
+        <div style={{ height: 140, background: 'linear-gradient(135deg, #1e3a8a, #9333ea)', position: 'relative' }}>
+           <div style={{ position: 'absolute', bottom: -45, left: 32, display: 'flex', alignItems: 'flex-end', gap: 20 }}>
+             <div 
+               onClick={() => setIsEditingAvatar(!isEditingAvatar)}
+               style={{ width: 100, height: 100, borderRadius: '50%', background: '#0f172a', border: '4px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 50, cursor: 'pointer', position: 'relative', boxShadow: '0 8px 16px rgba(0,0,0,0.5)', transition: 'transform 0.2s' }}
+               onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+             >
+               {avatar}
+               <div style={{ position: 'absolute', bottom: 0, right: 0, background: '#3b82f6', width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, border: '3px solid #1e293b', color: '#fff' }}>
+                 ✎
+               </div>
+             </div>
+           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-          {[
-            { label: 'Games Played', value: (profile?.games_played ?? 0).toString() },
-            { label: 'Games Won', value: (profile?.games_won ?? 0).toString() },
-            { label: 'Win Rate', value: `${winRate}%` },
-            { label: 'Best Streak', value: `${profile?.max_win_streak ?? 0}🔥` },
-            { label: 'Total XP', value: (profile?.total_xp ?? 0).toLocaleString() },
-            { label: 'DAANIK Coins', value: `🪙 ${(profile?.daanik_coins ?? 0).toLocaleString()}` },
-          ].map(stat => (
-            <div key={stat.label} style={{ padding: '14px 16px', background: '#0f1524', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)' }}>
-              <div style={{ fontSize: 15, color: '#64748b', marginBottom: 4 }}>{stat.label}</div>
-              <div style={{ fontSize: 23, fontWeight: 700, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>{stat.value}</div>
+        {/* Profile Info */}
+        <div style={{ padding: '60px 32px 32px 32px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+            <div>
+              <h2 style={{ fontSize: 36, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif', marginBottom: 8, letterSpacing: '-0.02em' }}>
+                {profile?.username ?? 'Unknown Player'}
+              </h2>
+              <RankBadge rp={rp} showProgress />
             </div>
-          ))}
+            
+            <div style={{ textAlign: 'right', background: 'rgba(255,255,255,0.03)', padding: '12px 20px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: 13, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4, fontWeight: 700 }}>Total XP</div>
+              <div style={{ fontSize: 26, fontWeight: 800, color: '#f59e0b', fontFamily: 'Space Grotesk, sans-serif' }}>{(profile?.total_xp ?? 0).toLocaleString()} <span style={{fontSize:18}}>⭐</span></div>
+            </div>
+          </div>
+
+          {/* Avatar Selector */}
+          {isEditingAvatar && (
+            <div style={{ marginTop: 28, padding: 20, background: 'rgba(0,0,0,0.2)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: 15, color: '#94a3b8', marginBottom: 16, fontWeight: 600 }}>Choose your avatar:</div>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                {AVATARS.map(a => (
+                  <button
+                    key={a}
+                    onClick={() => handleUpdateAvatar(a)}
+                    disabled={updating}
+                    style={{ width: 52, height: 52, borderRadius: '50%', background: avatar === a ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.05)', border: avatar === a ? '2px solid #3b82f6' : '1px solid rgba(255,255,255,0.1)', fontSize: 28, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: updating ? 0.5 : 1 }}
+                    onMouseEnter={e => { if (avatar !== a) e.currentTarget.style.background = 'rgba(255,255,255,0.1)' }}
+                    onMouseLeave={e => { if (avatar !== a) e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
+                  >
+                    {a}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </Card>
+
+      {/* Stats Grid */}
+      <h3 style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', marginBottom: 20, fontFamily: 'Space Grotesk, sans-serif' }}>Career Stats</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 40 }}>
+        {[
+          { label: 'DAANIK Coins', value: `${(profile?.daanik_coins ?? 0).toLocaleString()}`, icon: '🪙', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+          { label: 'Win Rate', value: `${winRate}%`, icon: '🎯', color: winRate >= 50 ? '#10b981' : '#f43f5e', bg: winRate >= 50 ? 'rgba(16,185,129,0.1)' : 'rgba(244,63,94,0.1)' },
+          { label: 'Games Won', value: (profile?.games_won ?? 0).toString(), icon: '🏆', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
+          { label: 'Games Played', value: (profile?.games_played ?? 0).toString(), icon: '🎮', color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
+          { label: 'Best Win Streak', value: `${profile?.max_win_streak ?? 0}`, icon: '🔥', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
+          { label: 'Current Streak', value: `${profile?.win_streak ?? 0}`, icon: '⚡', color: '#14b8a6', bg: 'rgba(20,184,166,0.1)' },
+        ].map(stat => (
+          <Card key={stat.label} style={{ padding: '24px 20px', display: 'flex', alignItems: 'center', gap: 20, background: 'linear-gradient(145deg, #111827, #0f172a)' }}>
+            <div style={{ width: 56, height: 56, borderRadius: 16, background: stat.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>
+              {stat.icon}
+            </div>
+            <div>
+              <div style={{ fontSize: 13, color: '#64748b', marginBottom: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
+              <div style={{ fontSize: 26, fontWeight: 800, color: '#f1f5f9', fontFamily: 'Space Grotesk, sans-serif' }}>{stat.value}</div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 32, display: 'flex', justifyContent: 'center' }}>
+        <Button variant="ghost" onClick={logout} style={{ color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.05)', padding: '12px 24px', fontSize: 16 }}>
+          Sign Out of Account
+        </Button>
+      </div>
     </div>
   )
 }

@@ -64,14 +64,14 @@ Open your browser to `http://localhost:5173`.
 
 ## 🃏 How to Play
 
-1. **The Goal:** Start with ₹5 Lakhs and be the first player to reach the **₹50 Lakhs** wealth goal.
+1. **The Goal:** Start with ₹5 Lakhs and be the first player to reach the **₹50 Lakhs** wealth goal, or have the most wealth when the **15-minute timer** runs out!
 2. **Turn Phases:** 
-   - **Draw Phase:** Draw a card from the deck.
-   - **Play Phase:** Choose a card from your hand to play.
+   - **Draw Phase:** Draw cards until you have a full hand of 4.
+   - **Play Phase:** Choose a card from your hand to play, or discard a defense card to pass your turn.
 3. **Card Types:**
    - **🟢 Decision Cards:** Choose how to spend your money. You can *Spend*, *Save*, or *Invest*.
    - **🔴 Action Cards:** Attack your opponents (e.g., Tax Raid, Steal, Market Crash).
-   - **🔵 Defense Cards:** Protect yourself against incoming attacks (e.g., Health Insurance, Cyber Shield).
+   - **🔵 Defense Cards:** Keep these in your hand to automatically protect yourself against incoming attacks (e.g., Health Insurance, Cyber Shield).
 4. **Market & Coins:** Complete matches to earn DAANIK Coins. Visit the Dashboard to invest your coins into the DAANIK Market!
 
 ---
